@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DISC — Dynamiques d'équipe</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&display=swap');
+:root{--d:#E03E36;--i:#F5B731;--s:#3EAF6E;--c:#2D7DD2;--bg:#FAFAFA;--surface:#FFF;--text:#1A1A1A;--muted:#6B7280;--border:#E5E7EB;--radius:14px;}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#111114;--surface:#1C1C21;--text:#E8E8EC;--muted:#9CA3AF;--border:#2D2D35;}}
+:root[data-theme="dark"]{--bg:#111114;--surface:#1C1C21;--text:#E8E8EC;--muted:#9CA3AF;--border:#2D2D35;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;}
+.ctr{max-width:720px;margin:0 auto;padding:20px 16px 60px;}
+h1{font-size:1.6rem;font-weight:700;text-align:center;margin-bottom:4px;}
+.ps{text-align:center;color:var(--muted);font-size:0.92rem;margin-bottom:28px;}
+.add{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:24px;}
+.add h2{font-size:1rem;font-weight:700;margin-bottom:14px;}
+.fg{display:grid;gap:14px;}
+.fl{display:flex;flex-direction:column;gap:4px;}
+.fl label{font-size:0.82rem;font-weight:600;color:var(--muted);}
+.fl input{padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;background:transparent;color:var(--text);font-family:inherit;font-size:0.93rem;outline:none;}
+.fl input:focus{border-color:var(--c);}
+.cr{display:flex;gap:14px;flex-wrap:wrap;}
+.cg{flex:1;min-width:150px;}.cg>label{display:block;font-size:0.82rem;font-weight:600;color:var(--muted);margin-bottom:4px;}
+.cps{display:flex;gap:6px;}
+.cp{width:42px;height:42px;border-radius:10px;border:2.5px solid transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;opacity:0.45;color:#fff;transition:all 0.15s;}
+.cp:hover{opacity:0.75;}.cp.active{border-color:var(--text);opacity:1;transform:scale(1.1);}
+.sn{font-size:0.78rem;color:var(--muted);font-style:italic;margin-top:4px;}
+.abtn{width:100%;padding:12px;border:none;border-radius:10px;background:var(--c);color:#fff;font-family:inherit;font-size:0.93rem;font-weight:600;cursor:pointer;margin-top:4px;}
+.abtn:disabled{opacity:0.3;cursor:not-allowed;}
+.pl{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px;}
+.pc{display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:20px;font-size:0.85rem;font-weight:600;color:#fff;position:relative;overflow:hidden;}
+.pcs{position:absolute;right:0;top:0;bottom:0;width:28%;opacity:0.5;border-radius:0 20px 20px 0;}
+.pct,.rm{position:relative;z-index:1;}.rm{cursor:pointer;opacity:0.7;font-size:1rem;margin-left:4px;}.rm:hover{opacity:1;}
+.ht{text-align:center;color:var(--muted);font-size:0.88rem;padding:12px 0;font-style:italic;}
+.rs{display:none;}.rs.vis{display:block;}
+.cd{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;}
+.cd h2{font-size:1.05rem;font-weight:700;margin-bottom:12px;}
+.tb{display:flex;height:28px;border-radius:8px;overflow:hidden;margin-bottom:10px;}
+.tb div{display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:#fff;}
+.ts{font-size:0.88rem;line-height:1.8;}
+.pg{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-bottom:16px;}
+.mp{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;border-left:4px solid transparent;}
+.mp h4{font-size:0.92rem;font-weight:700;margin-bottom:2px;}.mp .ms{font-size:0.8rem;color:var(--muted);margin-bottom:8px;}.mp p{font-size:0.85rem;line-height:1.5;}
+.pair{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;}
+.ph{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.pb{padding:4px 10px;border-radius:14px;color:#fff;font-weight:700;font-size:0.82rem;display:inline-flex;align-items:center;gap:3px;}
+.pb .sd{width:8px;height:8px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.6);}
+.pa{color:var(--muted);}
+.sp{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:14px 0;padding:16px;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;}
+.si{text-align:center;}.si .sl{font-size:0.75rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;}
+.si .sr{width:72px;height:72px;margin:0 auto 6px;position:relative;}.si .sr svg{transform:rotate(-90deg);}
+.si .sr circle{fill:none;stroke-width:6;}.si .sr .bg{stroke:var(--border);}.si .sr .fg{stroke-linecap:round;transition:stroke-dashoffset 1s ease;}
+.si .sv{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:1.1rem;font-weight:700;}
+.si .vd{font-size:0.78rem;font-weight:600;}
+.pbd p{font-size:0.87rem;line-height:1.6;}.pbd h3{font-size:0.9rem;font-weight:700;margin:12px 0 4px;}.pbd ul{margin:4px 0 0 18px;font-size:0.85rem;}.pbd ul li{margin-bottom:3px;}
+.nb{border-radius:10px;padding:14px 16px;margin-top:10px;}
+.rc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-top:16px;border-left:4px solid var(--s);}
+.rc h2{font-size:1.05rem;font-weight:700;margin-bottom:10px;}.rc ul{margin:6px 0 0 18px;font-size:0.88rem;line-height:1.7;}
+.syn{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px 22px;margin-bottom:20px;}
+.syn h2{font-size:1.1rem;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.syn h3{font-size:0.95rem;font-weight:700;margin:16px 0 6px;color:var(--c);}
+.syn p{font-size:0.9rem;line-height:1.7;margin-bottom:8px;}
+.syn .best{padding:12px 16px;border-radius:10px;background:color-mix(in srgb,var(--s) 8%,transparent);border-left:3px solid var(--s);margin:8px 0;}
+.syn .risk{padding:12px 16px;border-radius:10px;background:color-mix(in srgb,var(--d) 8%,transparent);border-left:3px solid var(--d);margin:8px 0;}
+.syn .tip{padding:12px 16px;border-radius:10px;background:color-mix(in srgb,var(--c) 8%,transparent);border-left:3px solid var(--c);margin:8px 0;}
+.es{text-align:center;margin-top:28px;}
+.eb{display:inline-flex;align-items:center;gap:8px;padding:14px 32px;border-radius:10px;border:none;background:var(--c);color:#fff;font-family:inherit;font-size:0.95rem;font-weight:600;cursor:pointer;}
+.eb:hover{filter:brightness(1.1);}
+.est{font-size:0.82rem;color:var(--muted);margin-top:8px;}
+</style>
+</head>
+<body>
+<div class="ctr">
+  <h1>DISC — Dynamiques d'équipe</h1>
+  <p class="ps">Profils composites (dominant + secondaire) · Analyse approfondie</p>
+  <div class="add"><h2>Ajouter une personne</h2><div class="fg">
+    <div class="fl"><label>Prénom</label><input type="text" id="inpN" placeholder="Ex : Laure" maxlength="30"></div>
+    <div class="cr">
+      <div class="cg"><label>Dominante</label><div class="cps" id="pP">
+        <div class="cp" data-d="D" style="background:var(--d)" onclick="pk('p','D',this)">D</div>
+        <div class="cp" data-d="I" style="background:var(--i)" onclick="pk('p','I',this)">I</div>
+        <div class="cp" data-d="S" style="background:var(--s)" onclick="pk('p','S',this)">S</div>
+        <div class="cp" data-d="C" style="background:var(--c)" onclick="pk('p','C',this)">C</div>
+      </div></div>
+      <div class="cg"><label>Secondaire</label><div class="cps" id="pS">
+        <div class="cp" data-d="D" style="background:var(--d)" onclick="pk('s','D',this)">D</div>
+        <div class="cp" data-d="I" style="background:var(--i)" onclick="pk('s','I',this)">I</div>
+        <div class="cp" data-d="S" style="background:var(--s)" onclick="pk('s','S',this)">S</div>
+        <div class="cp" data-d="C" style="background:var(--c)" onclick="pk('s','C',this)">C</div>
+      </div><p class="sn">Peut être identique (profil très marqué)</p></div>
+    </div>
+    <button class="abtn" id="aB" onclick="addP()" disabled>Ajouter</button>
+  </div></div>
+  <div class="pl" id="pL"></div>
+  <div class="ht" id="hint">Ajoute au moins 2 personnes pour voir les dynamiques.</div>
+  <div class="rs" id="results">
+    <div id="tO"></div><div id="pSum"></div><div id="synth"></div><div id="pSec"></div><div id="rSec"></div>
+    <div class="es"><button class="eb" onclick="doExport()">📄 Exporter le rapport Word</button><div class="est" id="eSt"></div></div>
+  </div>
+</div>
+<script>
+
+var M={
+D:{n:"Dominance",c:"#E03E36",e:"\ud83d\udd34",s:"Direct, decisif, oriente resultats",motto:"Je veux des resultats, maintenant.",str:"Devient autoritaire, impatient",bes:"Autonomie, defis, controle",peur:"Perdre le controle",ctip:"Sois concis, va droit au but, propose des solutions"},
+I:{n:"Influence",c:"#F5B731",e:"\ud83d\udfe1",s:"Enthousiaste, sociable, creatif",motto:"Je veux que ce soit fun et ensemble.",str:"Se disperse, parle beaucoup, perd en rigueur",bes:"Reconnaissance, interactions, variete",peur:"Etre ignore ou rejete",ctip:"Sois chaleureux, valorise, raconte une histoire"},
+S:{n:"Stabilite",c:"#3EAF6E",e:"\ud83d\udfe2",s:"Patient, fiable, a l'ecoute",motto:"Je veux de l'harmonie et de la confiance.",str:"Se replie, evite le conflit, accumule en silence",bes:"Stabilite, cooperation, temps",peur:"Le conflit, l'instabilite",ctip:"Sois patient, rassurant, donne du temps"},
+C:{n:"Conformite",c:"#2D7DD2",e:"\ud83d\udfe5",s:"Methodique, rigoureux, analytique",motto:"Je veux que ce soit bien fait, avec des preuves.",str:"Devient ultra-critique, perfectionniste, distant",bes:"Donnees, structure, reflexion",peur:"L'erreur, l'approximation",ctip:"Fournis des preuves, sois structure, respecte les process"}
+};
+
+var IX={
+"D-D":{compat:55,compl:30,l:"Duo de choc ou de chocs",dyn:"Deux D = energie d'action intense. Objectif commun = machine de guerre. Divergence = bras de fer.",f:["Decisions ultra-rapides","Forte execution","Zero hesitation"],r:["Lutte de pouvoir","Ecoute insuffisante","Pas de recul"],co:["Definir les zones de responsabilite","Arbitrage par donnees ou tiers","S'ecouter AVANT de trancher"],sd:"Escalade : les deux deviennent directifs. Besoin d'un tiers.",cd:"Parler resultats. Respecter le territoire de l'autre.",wp:"En gestion de crise, ce duo est imbattable : decisions eclairs, zero procrastination. Un projet qui traine peut etre deboque en une journee.",wn:"Au quotidien, competition latente : emails secs, reunions ou chacun veut le dernier mot. Les collaborateurs se sentent pris entre deux feux."},
+"D-I":{compat:72,compl:75,l:"Duo visionnaire",dyn:"Le D donne la direction, le I l'adhesion. Lancent et vendent des projets avec force.",f:["Lancement dynamique","Entrainent les autres","Action + communication"],r:["Manque de suivi","Decisions trop rapides","Le I peut se sentir ecrase"],co:["S'entourer d'un S ou C pour le suivi","Valoriser les idees du I","Formaliser par ecrit"],sd:"Le D devient cassant, le I se sent rejete et se disperse.",cd:"Le D ecoute les idees du I avant de trancher. Le I accepte la franchise du D.",wp:"En phase de pitch ou lancement : le D structure, le I embarque. Presentations percutantes, projets qui decollent vite.",wn:"En execution longue : le I oublie les suivis, le D s'impatiente. Les reunions deviennent show du I + recadrage du D."},
+"D-S":{compat:45,compl:85,l:"Complementaires sous conditions",dyn:"Le D pousse, le S stabilise. Fonctionne si le D respecte le rythme du S.",f:["Equilibre action / relation","Le S tempere le D","Le D dynamise le S"],r:["Le D peut brusquer","Le S accumule du ressentiment","Rythmes opposes"],co:["Le D demande l'avis ET attend","Le S exprime son desaccord tot","Signaux de tempo"],sd:"Le D accelere + le S se tait = decisions unilaterales.",cd:"Le D ralentit et pose des questions ouvertes. Le S ose dire non.",wp:"Le S cree un climat de confiance pendant que le D prend les decisions difficiles. Ideal pour le management de proximite.",wn:"Le D confond silence du S avec accord. A long terme, le S s'epuise. Risque de burn-out silencieux."},
+"D-C":{compat:40,compl:82,l:"Efficacite vs precision",dyn:"Le D veut vite, le C veut bien. Tension productive quand bien geree.",f:["Resultats de qualite","Le C apporte la rigueur","Le D apporte la vitesse"],r:["Le D trouve le C lent","Le C trouve le D impulsif","Frustration mutuelle"],co:["Convenir du niveau de qualite attendu","Le C priorise ses remarques","Le D reconnait le travail de fond"],sd:"Le D impose, le C se braque sur les details. Revenir aux donnees.",cd:"Le D fournit un cadre clair. Le C livre ses analyses par ecrit.",wp:"Le C prepare des dossiers solides, le D les transforme en decisions. Excellent pour audits, rapports techniques, appels d'offres.",wn:"Le D envoie des directives floues, le C les renvoie pour clarification. Boucle de frustration, deadlines en danger."},
+"I-I":{compat:85,compl:28,l:"Festival d'idees",dyn:"Energie debordante, idees fusent, ambiance top. Risque : rien ne se concretise.",f:["Brainstorming prolifique","Ambiance motivante","Innovation"],r:["Dispersion totale","Aucun suivi","Chacun parle, personne ne structure"],co:["Plan d'action ecrit avec deadlines","Inviter un C ou S","Se challenger sur le suivi"],sd:"Les deux parlent en meme temps, clarte baisse. Nommer un facilitateur.",cd:"Se laisser finir ses phrases. Formaliser a l'ecrit.",wp:"Brainstorming electrique, aucune peur de proposer. Ce duo porte l'innovation et les events d'equipe. Les collegues adorent travailler avec eux.",wn:"Comptes-rendus inexistants, to-do lists perdues, relances oubliees. Le sujet initial oublie en 10 min. Les C et S autour sont perdus."},
+"I-S":{compat:88,compl:78,l:"Alliance naturelle",dyn:"Un des duos les plus fluides. Le I apporte l'elan, le S la stabilite.",f:["Communication facile","Le I dynamise, le S ancre","Forte cohesion"],r:["Evitement des sujets difficiles","Manque de confrontation","Decisions pour la paix"],co:["Oser les desaccords","Le I verifie (silence != accord)","Le S exprime ses besoins"],sd:"Le I parle pour rien, le S encaisse. Rituels de feedback honnete.",cd:"Le I verifie la comprehension. Le S dit non plutot que oui mais.",wp:"Duo ideal en accompagnement : le I motive, le S rassure. En formation, mediation, conduite du changement. Excellent pour les projets QVT et RPS.",wn:"Face a un probleme grave, ni l'un ni l'autre n'ose trancher. Le I minimise avec humour, le S espere que ca passe. Le probleme s'enkyste."},
+"I-C":{compat:32,compl:85,l:"Tension creative",dyn:"Le duo le plus polarise. Le I = emotion, le C = faits. Puissant ou incomprehension.",f:["Le I humanise le C","Le C structure le I","Vision + rigueur si alignes"],r:["Le I trouve le C froid","Le C trouve le I superficiel","Communication opposee"],co:["Le I prepare avec des donnees","Le C valorise avant de critiquer","Langage commun : schemas, visuels"],sd:"Le I se sent juge, le C envahi. Terrain neutre : faits + impact humain.",cd:"Le I envoie un resume avant la reunion. Le C commence par le positif.",wp:"Quand ils s'alignent : le I transforme les donnees du C en messages percutants. Rapport du C + pitch du I = combinaison redoutable.",wn:"Le I propose, le C demolit avec des chiffres. Le I arrete de proposer, le C se retrouve seul. Dialogue de sourds sans mediateur."},
+"S-S":{compat:90,compl:30,l:"Havre de paix",dyn:"Serein, cooperatif, stable. Harmonie naturelle. Risque : immobilisme.",f:["Ambiance ideale","Fiabilite","Ecoute exemplaire"],r:["Evitement du conflit","Difficulte a trancher","Resistance au changement"],co:["Permission de dire non","Deadlines de decision","Desaccord != rupture"],sd:"Les deux evitent le probleme, il grossit. Point de verite regulier.",cd:"Nommer les non-dits. Question : qu'est-ce qu'on n'ose pas se dire ?",wp:"Zero tension, ecoute max, entraide spontanee. Suivi operationnel impeccable. Environnement ideal pour un travail regulier et fiable.",wn:"Face au changement, les deux freinent. Retours negatifs repousses indefiniment. Un conflit larve peut durer des mois sans etre nomme."},
+"S-C":{compat:72,compl:74,l:"Duo fiabilite",dyn:"Le S apporte l'humain, le C la methode. Qualite, fiabilite, solidite.",f:["Haute qualite","Processus bien huiles","Ambiance calme et pro"],r:["Lenteur","Manque d'audace","Opportunites ratees"],co:["Criteres de declenchement clairs","Le S aide le C en chaleur","Le C aide le S a objectiver"],sd:"Le S se tait, le C se noie dans les details. Question : prochaine action concrete ?",cd:"Le C traduit en recommandations. Le S partage son ressenti.",wp:"Duo d'excellence qualite : procedures documentees, controles rigoureux. Ideal pour DUERP, fiches de poste, audit conformite.",wn:"Projet innovant ? Le C cadre, le S attend. Six mois plus tard : cadrage parfait, rien n'a demarre. Le management s'impatiente."},
+"C-C":{compat:75,compl:25,l:"Laboratoire de precision",dyn:"Rigueur exceptionnelle. Perfectionnisme combine = potentiellement paralysant.",f:["Excellence technique","Analyse approfondie","Detection des erreurs"],r:["Paralysie par l'analyse","Perfectionnisme sans frein","Manque d'elan"],co:["Definir le good enough","Alterner analyse et livraison","S'entourer d'un I ou D"],sd:"Surenchere de perfectionnisme. Regle : 80% = on livre et on itere.",cd:"Se challenger sur assez bien. Planifier les revues.",wp:"En R&D, data ou audit : livrables d'une qualite rare. Benchmark, veille reglementaire, analyse de risques : rien ne leur echappe.",wn:"Un email de 3 lignes relu 10 fois. Deadlines repoussees au nom de la qualite. Les D et I les trouvent trop lents. Isolement progressif."}
+};
+
+var secN={D:"apporte un cote combatif et oriente action",I:"apporte un cote chaleureux et communicatif",S:"apporte un cote stabilisateur et empathique",C:"apporte un cote analytique et exigeant"};
+var secT={"D-D":"Deux sec. D amplifient la competition.","D-I":"Sec. D accelere, sec. I communique.","D-S":"D-sec. fonce, S-sec. securise. Alterner.","D-C":"D-sec. tranche, C-sec. verifie.","I-I":"Double sec. I = time-keeper necessaire.","I-S":"I-sec. ouvre, S-sec. ecoute. Harmonie.","I-C":"I-sec. partage, C-sec. analyse seul.","S-S":"Double sec. S = resistance au changement.","S-C":"S-sec. harmonie + C-sec. perfection = soigne mais lent.","C-C":"Double sec. C = criteres d'arret obligatoires."};
+var samC={D:"Profil D tres marque : leadership ultra-affirme, force de decision, risque d'autoritarisme.",I:"Profil I tres marque : charisme et energie max, mais dispersion decuplee.",S:"Profil S tres marque : ancrage et fiabilite exceptionnels, mais difficulte a s'affirmer.",C:"Profil C tres marque : rigueur au sommet, perfectionnisme potentiellement bloquant."};
+
+function gk(a,b){return [a,b].sort().join("-");}
+function calcSc(a,b){var ix=IX[gk(a.p,b.p)];var bc=ix.compat,bl=ix.compl,bo=0;if(a.s===b.p||b.s===a.p)bo+=8;if(a.s===b.s)bo+=4;if(a.p===a.s)bo-=3;if(b.p===b.s)bo-=3;if(a.s!==a.p&&b.s!==b.p){var si=IX[gk(a.s,b.s)];if(si){bc=Math.round(bc*0.7+si.compat*0.3);bl=Math.round(bl*0.7+si.compl*0.3);}}var cp=Math.min(98,Math.max(15,bc+bo)),cl=Math.min(98,Math.max(15,bl+bo));return{compat:cp,compl:cl,syn:Math.round(cp*0.45+cl*0.55)};}
+
+var P=[],sP=null,sS=null;
+document.getElementById("inpN").addEventListener("input",ck);
+document.getElementById("inpN").addEventListener("keydown",function(e){if(e.key==="Enter")addP();});
+function pk(w,d,el){var c=w==="p"?"pP":"pS";document.querySelectorAll("#"+c+" .cp").forEach(function(x){x.classList.remove("active");});el.classList.add("active");if(w==="p")sP=d;else sS=d;ck();}
+function ck(){document.getElementById("aB").disabled=!(document.getElementById("inpN").value.trim()&&sP&&sS);}
+function addP(){var n=document.getElementById("inpN").value.trim();if(!n||!sP||!sS||P.length>=8)return;P.push({name:n,p:sP,s:sS});document.getElementById("inpN").value="";sP=sS=null;document.querySelectorAll(".cp").forEach(function(x){x.classList.remove("active");});ck();rPL();if(P.length>=2)rAll();document.getElementById("inpN").focus();}
+function rmP(i){P.splice(i,1);rPL();if(P.length>=2)rAll();else document.getElementById("results").classList.remove("vis");}
+
+function rPL(){var h="";P.forEach(function(p,i){h+='<span class="pc" style="background:'+M[p.p].c+'"><span class="pcs" style="background:'+M[p.s].c+'"></span><span class="pct">'+M[p.p].e+" "+p.name+" ("+p.p+"/"+p.s+')</span><span class="rm" onclick="rmP('+i+')">&#10005;</span></span>';});document.getElementById("pL").innerHTML=h;document.getElementById("hint").style.display=P.length>=2?"none":"block";}
+
+function rAll(){document.getElementById("results").classList.add("vis");rTeam();rProf();rSynth();rPairs();rReco();}
+
+function rTeam(){var ct={D:0,I:0,S:0,C:0};P.forEach(function(p){ct[p.p]++;ct[p.s]+=0.5;});var t=ct.D+ct.I+ct.S+ct.C;var bar="";["D","I","S","C"].forEach(function(k){if(ct[k]>0)bar+='<div style="width:'+Math.round(ct[k]/t*100)+"%;background:"+M[k].c+'">'+Math.round(ct[k]/t*100)+"%</div>";});var pc={D:0,I:0,S:0,C:0};P.forEach(function(p){pc[p.p]++;});var mi=["D","I","S","C"].filter(function(k){return pc[k]===0;}),ov=["D","I","S","C"].filter(function(k){return pc[k]>=Math.ceil(P.length*0.5);}),cs=mi.filter(function(k){return P.some(function(p){return p.s===k;});});var d="";if(mi.length)d+="<br>&#9888;&#65039; <b>Absent en dominant :</b> "+mi.map(function(k){return M[k].e+" "+M[k].n;}).join(", ");if(cs.length)d+="<br>&#128260; <b>Compense en secondaire :</b> "+cs.map(function(k){return M[k].e+" "+M[k].n;}).join(", ");if(ov.length)d+="<br>&#128202; <b>Surrepresente :</b> "+ov.map(function(k){return M[k].e+" "+M[k].n;}).join(", ");if(!mi.length&&!ov.length)d+="<br>&#9989; <b>Equipe equilibree</b>";document.getElementById("tO").innerHTML='<div class="cd"><h2>Vue d\'ensemble ('+P.length+' personnes)</h2><div class="tb">'+bar+'</div><p style="font-size:0.8rem;color:var(--muted);margin-bottom:8px;">Ponderation : dominante=1, secondaire=0.5</p><div class="ts">'+P.map(function(p){return M[p.p].e+" <b>"+p.name+"</b> : "+M[p.p].n+(p.p===p.s?" (tres marque)":"-"+M[p.s].n);}).join(" &middot; ")+d+"</div></div>";}
+
+function rProf(){var h='<h2 style="font-size:1.05rem;font-weight:700;margin-bottom:12px;">Fiches individuelles</h2><div class="pg">';P.forEach(function(p){var pm=M[p.p],sm=M[p.s],eq=p.p===p.s;h+='<div class="mp" style="border-left-color:'+pm.c+'"><h4>'+pm.e+" "+p.name+'</h4><div class="ms">'+pm.n+(eq?" (tres marque)":" / "+sm.n)+"</div>"+(eq?"<p><em>"+samC[p.p]+"</em></p>":"")+"<p><b>Motto :</b> "+pm.motto+"</p><p><b>Besoin :</b> "+pm.bes+"</p><p><b>Peur :</b> "+pm.peur+"</p><p><b>Sous stress :</b> "+pm.str+"</p>"+(!eq?"<p><b>Nuance "+sm.e+" :</b> "+secN[p.s]+"</p>":"")+"<p><b>Communication :</b> "+pm.ctip+"</p></div>";});h+="</div>";document.getElementById("pSum").innerHTML=h;}
+
+function rSynth(){
+  // Compute all pairs
+  var pairs=[];
+  for(var i=0;i<P.length;i++){for(var j=i+1;j<P.length;j++){
+    var a=P[i],b=P[j],k=gk(a.p,b.p),x=IX[k],sc=calcSc(a,b);
+    pairs.push({a:a,b:b,ix:x,sc:sc,key:k});
+  }}
+  pairs.sort(function(a,b){return b.sc.syn-a.sc.syn;});
+  var best=pairs[0],worst=pairs[pairs.length-1];
+
+  // Team profile description
+  var pc={D:0,I:0,S:0,C:0};P.forEach(function(p){pc[p.p]++;});
+  var dom=Object.keys(pc).sort(function(a,b){return pc[b]-pc[a];})[0];
+  var mi=["D","I","S","C"].filter(function(k){return pc[k]===0;});
+
+  var h='<div class="syn"><h2>&#128209; Synthese d\'expert — Analyse des dynamiques</h2>';
+
+  // 1. Reading globale
+  h+='<h3>1. Lecture globale de l\'equipe</h3>';
+  if(P.length===2){
+    h+='<p>Ce binome associe un profil <b>'+M[P[0].p].n+'</b>';
+    if(P[0].p!==P[0].s) h+=' nuance '+M[P[0].s].n;
+    h+=' et un profil <b>'+M[P[1].p].n+'</b>';
+    if(P[1].p!==P[1].s) h+=' nuance '+M[P[1].s].n;
+    h+='. ';
+    if(P[0].p===P[1].p){
+      h+='Ils partagent la meme dominante, ce qui facilite la comprehension mutuelle mais limite la couverture des angles morts. Le risque principal est l\'amplification des biais communs : ';
+      if(P[0].p==='D') h+='acceleration sans recul, competition interne.';
+      else if(P[0].p==='I') h+='dispersion et manque de suivi.';
+      else if(P[0].p==='S') h+='evitement du conflit et immobilisme.';
+      else h+='perfectionnisme paralysant et lenteur decisionnelle.';
+    } else {
+      var syLvl=best.sc.syn;
+      if(syLvl>=70) h+='Cette combinaison est naturellement favorable : les profils se completent sur des registres differents, creant un equilibre entre '+M[P[0].p].n.toLowerCase()+' et '+M[P[1].p].n.toLowerCase()+'.';
+      else if(syLvl>=50) h+='Cette combinaison est fonctionnelle mais demande des ajustements conscients. Les registres comportementaux sont suffisamment differents pour generer de la complementarite, mais aussi des frictions si les besoins de chacun ne sont pas respectes.';
+      else h+='Cette combinaison est exigeante. Les registres comportementaux sont tres eloignes, ce qui cree un fort potentiel de complementarite MAIS aussi un risque eleve d\'incomprehension. Ce binome necessite un effort delibere de communication adaptee.';
+    }
+    h+='</p>';
+  } else {
+    h+='<p>Cette equipe de '+P.length+' personnes est dominee par le profil <b>'+M[dom].n+'</b>, ce qui donne une coloration globale ';
+    if(dom==='D') h+='orientee action et resultats : les decisions se prennent vite, mais l\'ecoute et la nuance peuvent manquer.';
+    else if(dom==='I') h+='orientee communication et enthousiasme : l\'ambiance est excellente, mais le suivi operationnel necessite de la vigilance.';
+    else if(dom==='S') h+='orientee cooperation et stabilite : le climat humain est fort, mais l\'initiative et la prise de risque peuvent faire defaut.';
+    else h+='orientee rigueur et methode : la qualite est au rendez-vous, mais la reactivite et l\'adaptabilite meritent attention.';
+    h+='</p>';
+  }
+
+  // 2. Best pair
+  h+='<h3>2. Meilleure synergie</h3>';
+  h+='<div class="best"><p><b>'+best.a.name+' ('+M[best.a.p].n+') &#10231; '+best.b.name+' ('+M[best.b.p].n+') — Synergie : '+best.sc.syn+'%</b></p>';
+  h+='<p>C\'est le binome le plus performant de cette configuration. ';
+  if(best.sc.compat>=70&&best.sc.compl>=70) h+='Ils cumulent une bonne entente naturelle ('+best.sc.compat+'% de compatibilite) ET une forte complementarite ('+best.sc.compl+'%). C\'est rare : cela signifie qu\'ils se comprennent facilement tout en couvrant mutuellement leurs angles morts. ';
+  else if(best.sc.compat>=70) h+='Leur compatibilite est elevee ('+best.sc.compat+'%) : la communication coule naturellement entre eux. ';
+  else if(best.sc.compl>=70) h+='Leur complementarite est remarquable ('+best.sc.compl+'%) : ce que l\'un ne voit pas, l\'autre le couvre. ';
+  h+='Concretement : '+best.ix.wp+'</p></div>';
+
+  // 3. Most challenging pair
+  if(pairs.length>1){
+    h+='<h3>3. Binome le plus exigeant</h3>';
+    h+='<div class="risk"><p><b>'+worst.a.name+' ('+M[worst.a.p].n+') &#10231; '+worst.b.name+' ('+M[worst.b.p].n+') — Synergie : '+worst.sc.syn+'%</b></p>';
+    h+='<p>Ce binome demande le plus d\'attention. ';
+    if(worst.sc.compat<40) h+='La compatibilite naturelle est basse ('+worst.sc.compat+'%) : leurs styles de communication et leurs rythmes de travail divergent sensiblement. Sans effort conscient, les malentendus s\'accumulent. ';
+    if(worst.sc.compl>=60) h+='Paradoxalement, leur complementarite est reelle ('+worst.sc.compl+'%) : s\'ils apprennent a travailler ensemble, ils peuvent produire un resultat superieur a ce que chacun ferait seul. Le jeu en vaut la chandelle. ';
+    else h+='La complementarite est egalement limitee ('+worst.sc.compl+'%), ce qui signifie que le binome a interet a s\'entourer de profils tiers pour equilibrer. ';
+    h+='Risque concret : '+worst.ix.wn+'</p></div>';
+  }
+
+  // 4. Cross-compensation analysis
+  h+='<h3>'+(pairs.length>1?'4':'3')+'. Dynamiques croisees</h3>';
+
+  // Check who compensates whom via secondary
+  var compensations=[];
+  P.forEach(function(p){
+    P.forEach(function(q){
+      if(p!==q&&p.s===q.p&&p.p!==q.p){
+        compensations.push(p.name+" ("+M[p.p].n+") possede en secondaire la dominante de "+q.name+" ("+M[q.p].n+") : cela signifie que "+p.name+" peut naturellement adapter son style pour mieux communiquer avec "+q.name+".");
+      }
+    });
+  });
+  if(compensations.length){
+    h+='<p><b>Ponts naturels identifies :</b></p>';
+    compensations.forEach(function(c){h+='<div class="tip"><p>'+c+'</p></div>';});
+  }
+
+  // Missing profiles impact
+  if(mi.length){
+    h+='<p><b>Impact des profils absents :</b></p>';
+    mi.forEach(function(k){
+      var impact="";
+      if(k==="D") impact="Sans Dominance en tete, l\'equipe risque de manquer de cadrage dans les moments critiques. Les decisions peuvent trainer, les priorites rester floues. <b>Conseil :</b> designer un \"decideur de secours\" pour les situations urgentes, ou s\'appuyer sur les membres ayant D en secondaire.";
+      if(k==="I") impact="Sans Influence en tete, la communication peut devenir trop factuelle ou procedurale. L\'equipe risque de manquer d\'ambassadeurs internes et de capacite a embarquer les parties prenantes. <b>Conseil :</b> planifier des temps d\'echange informels et valoriser les contributions individuelles a voix haute.";
+      if(k==="S") impact="Sans Stabilite en tete, le climat humain peut se degrader insidieusement. Les besoins individuels passent au second plan, le turnover emotionnel guette. <b>Conseil :</b> instaurer des rituels de feedback bienveillant et verifier regulierement le moral des troupes.";
+      if(k==="C") impact="Sans Conformite en tete, la rigueur peut faiblir : erreurs non detectees, process approximatifs, documentation insuffisante. <b>Conseil :</b> mettre en place des checklists de controle et des revues par les pairs avant chaque livrable.";
+      h+='<div class="risk"><p>'+M[k].e+' <b>'+M[k].n+' absent :</b> '+impact+'</p></div>';
+    });
+  }
+
+  // 5. Key recommendation
+  h+='<h3>'+(pairs.length>1?'5':'4')+'. Cle de fonctionnement</h3>';
+  h+='<div class="tip"><p><b>La regle d\'or du DISC :</b> chaque membre de cette equipe a un style de communication different. La performance collective ne depend pas de qui a raison, mais de la capacite de chacun a communiquer dans le style de l\'AUTRE :</p>';
+  h+='<p>';
+  P.forEach(function(p){
+    h+='&#8226; Pour parler a <b>'+p.name+'</b> ('+M[p.p].n+') : '+M[p.p].ctip+'. ';
+  });
+  h+='</p></div>';
+
+  // Average synergy
+  var avgSyn=Math.round(pairs.reduce(function(s,p){return s+p.sc.syn;},0)/pairs.length);
+  h+='<p style="margin-top:14px;text-align:center;font-size:1.1rem;"><b>Score de synergie moyen de l\'equipe : <span style="color:'+vdt(avgSyn).c+'">'+avgSyn+'% — '+vdt(avgSyn).t+'</span></b></p>';
+
+  h+='</div>';
+  document.getElementById("synth").innerHTML=h;
+}
+
+function ring(pc,co){var r=30,ci=2*Math.PI*r,of=ci*(1-pc/100);return'<svg width="72" height="72" viewBox="0 0 72 72"><circle class="bg" cx="36" cy="36" r="'+r+'"/><circle class="fg" cx="36" cy="36" r="'+r+'" stroke="'+co+'" stroke-dasharray="'+ci+'" stroke-dashoffset="'+of+'"/></svg>';}
+function vdt(v){if(v>=80)return{t:"Excellent",c:"#16a34a"};if(v>=65)return{t:"Bon",c:"#2D7DD2"};if(v>=50)return{t:"Correct",c:"#d97706"};if(v>=35)return{t:"Tendu",c:"#ea580c"};return{t:"Difficile",c:"#dc2626"};}
+
+function rPairs(){var h='<h2 style="font-size:1.05rem;font-weight:700;margin:20px 0 14px;">Interactions par binome</h2>';
+for(var i=0;i<P.length;i++){for(var j=i+1;j<P.length;j++){var a=P[i],b=P[j],k=gk(a.p,b.p),x=IX[k],sk=gk(a.s,b.s),sc=calcSc(a,b);
+var vc=vdt(sc.compat),vl=vdt(sc.compl),vs=vdt(sc.syn);
+h+='<div class="pair"><div class="ph"><span class="pb" style="background:'+M[a.p].c+'">'+M[a.p].e+" "+a.name+' <span class="sd" style="background:'+M[a.s].c+'"></span></span><span class="pa">&#10231;</span><span class="pb" style="background:'+M[b.p].c+'">'+M[b.p].e+" "+b.name+' <span class="sd" style="background:'+M[b.s].c+'"></span></span></div>';
+h+='<div class="sp"><div class="si"><div class="sl">Compatibilite</div><div class="sr">'+ring(sc.compat,vc.c)+'<div class="sv" style="color:'+vc.c+'">'+sc.compat+'%</div></div><div class="vd" style="color:'+vc.c+'">'+vc.t+'</div></div>';
+h+='<div class="si"><div class="sl">Complementarite</div><div class="sr">'+ring(sc.compl,vl.c)+'<div class="sv" style="color:'+vl.c+'">'+sc.compl+'%</div></div><div class="vd" style="color:'+vl.c+'">'+vl.t+'</div></div>';
+h+='<div class="si"><div class="sl">Synergie</div><div class="sr">'+ring(sc.syn,vs.c)+'<div class="sv" style="color:'+vs.c+'">'+sc.syn+'%</div></div><div class="vd" style="color:'+vs.c+'">'+vs.t+'</div></div></div>';
+h+='<div class="pbd"><p><b>'+x.l+'</b> <span style="font-size:0.82rem;color:var(--muted);">('+M[a.p].n+' / '+M[b.p].n+')</span></p><p>'+x.dyn+'</p>';
+h+='<h3>&#9989; Forces</h3><ul>'+x.f.map(function(f){return"<li>"+f+"</li>";}).join("")+"</ul>";
+h+='<h3>&#9888;&#65039; Risques</h3><ul>'+x.r.map(function(r){return"<li>"+r+"</li>";}).join("")+"</ul>";
+h+='<h3>&#128161; Conseils</h3><ul>'+x.co.map(function(c){return"<li>"+c+"</li>";}).join("")+"</ul>";
+h+='<div class="nb" style="background:color-mix(in srgb,var(--s) 6%,transparent);border:1px solid color-mix(in srgb,var(--s) 18%,transparent);"><h4 style="color:#16a34a;">&#9989; Interaction positive au travail</h4><p>'+x.wp+'</p></div>';
+h+='<div class="nb" style="background:color-mix(in srgb,var(--d) 6%,transparent);border:1px solid color-mix(in srgb,var(--d) 18%,transparent);"><h4 style="color:var(--d);">&#10060; Interaction negative au travail</h4><p>'+x.wn+'</p></div>';
+h+='<div class="nb" style="background:color-mix(in srgb,var(--d) 6%,transparent);border:1px solid color-mix(in srgb,var(--d) 18%,transparent);"><h4 style="color:var(--d);">&#128293; Sous stress ensemble</h4><p>'+x.sd+'</p></div>';
+h+='<div class="nb" style="background:color-mix(in srgb,var(--s) 6%,transparent);border:1px solid color-mix(in srgb,var(--s) 18%,transparent);"><h4 style="color:#168a50;">&#128172; Cles de communication</h4><p>'+x.cd+'</p></div>';
+h+='<div class="nb" style="background:color-mix(in srgb,var(--c) 6%,transparent);border:1px solid color-mix(in srgb,var(--c) 18%,transparent);"><h4 style="color:var(--c);">&#127912; Nuance des secondaires</h4><p><b>'+a.name+'</b> (sec. '+M[a.s].e+' '+M[a.s].n+') : '+secN[a.s]+'.</p><p><b>'+b.name+'</b> (sec. '+M[b.s].e+' '+M[b.s].n+') : '+secN[b.s]+'.</p>'+(secT[sk]?'<p style="margin-top:6px;font-weight:600;">&#8594; '+secT[sk]+'</p>':'')+'</div>';
+h+='</div></div>';
+}}document.getElementById("pSec").innerHTML=h;}
+
+function rReco(){var pc={D:0,I:0,S:0,C:0};P.forEach(function(p){pc[p.p]++;});var mi=["D","I","S","C"].filter(function(k){return pc[k]===0;});var t=[];if(mi.indexOf("D")>=0)t.push("Manque de <b>Dominance</b> : nommer un decideur de secours.");if(mi.indexOf("I")>=0)t.push("Manque d'<b>Influence</b> : prevoir des moments de partage.");if(mi.indexOf("S")>=0)t.push("Manque de <b>Stabilite</b> : ritualiser les points individuels.");if(mi.indexOf("C")>=0)t.push("Manque de <b>Conformite</b> : mettre en place des checklists.");if(!t.length)t.push("Bonne diversite !");t.push("<b>Regle d'or DISC :</b> communique dans SON style. D=concret, I=energie, S=securite, C=preuves.");document.getElementById("rSec").innerHTML='<div class="rc"><h2>&#127919; Recommandations</h2><ul>'+t.map(function(x){return"<li>"+x+"</li>";}).join("")+"</ul></div>";}
+
+function doExport(){
+  document.getElementById("eSt").textContent="Generation...";
+  try{
+  var now=new Date();
+  var ds=now.getDate()+"/"+(now.getMonth()+1)+"/"+now.getFullYear();
+  var d="<html><head><meta charset='utf-8'><style>@page{size:A4;margin:2cm;}body{font-family:Calibri,sans-serif;font-size:11pt;line-height:1.6;}h1{font-size:20pt;color:#2D7DD2;border-bottom:3px solid #2D7DD2;padding-bottom:6px;}h2{font-size:14pt;margin-top:20px;border-bottom:1px solid #ddd;padding-bottom:4px;}table{border-collapse:collapse;width:100%;margin:10px 0;}td,th{border:1px solid #ccc;padding:7px 12px;}th{background:#f0f4f8;font-weight:700;text-align:left;}ul{margin:4px 0 4px 20px;}li{margin-bottom:2px;}.bx{border:1px solid #ddd;padding:12px 16px;margin:8px 0;page-break-inside:avoid;}</style></head><body>";
+  d+="<h1>Rapport de dynamiques DISC</h1>";
+  d+="<p><b>Date :</b> "+ds+" | <b>Participants :</b> "+P.map(function(p){return p.name+" ("+M[p.p].n+"/"+M[p.s].n+")";}).join(", ")+"</p>";
+  d+="<h2>1. Composition</h2><table><tr><th>Nom</th><th>Dominante</th><th>Secondaire</th></tr>";
+  P.forEach(function(p){d+="<tr><td>"+p.name+"</td><td style='color:"+M[p.p].c+";font-weight:700'>"+M[p.p].n+"</td><td style='color:"+M[p.s].c+";font-weight:700'>"+M[p.s].n+"</td></tr>";});
+  d+="</table><h2>2. Fiches individuelles</h2>";
+  P.forEach(function(p){var pm=M[p.p],sm=M[p.s],eq=p.p===p.s;d+="<div class='bx' style='border-left:4px solid "+pm.c+"'><p style='font-weight:bold;font-size:12pt'>"+p.name+" - "+pm.n+(eq?" (tres marque)":"/"+sm.n)+"</p>"+(eq?"<p><em>"+samC[p.p]+"</em></p>":"")+"<p><b>Motto :</b> "+pm.motto+"</p><p><b>Besoin :</b> "+pm.bes+" | <b>Peur :</b> "+pm.peur+"</p><p><b>Sous stress :</b> "+pm.str+"</p>"+(!eq?"<p><b>Nuance :</b> "+secN[p.s]+"</p>":"")+"<p><b>Communication :</b> "+pm.ctip+"</p></div>";});
+  d+="<h2>3. Synthese des dynamiques</h2>";
+  // Compute pairs for export
+  var xpairs=[];
+  for(var xi=0;xi<P.length;xi++){for(var xj=xi+1;xj<P.length;xj++){
+    var xa=P[xi],xb=P[xj],xk=gk(xa.p,xb.p),xx=IX[xk],xsc=calcSc(xa,xb);
+    xpairs.push({a:xa,b:xb,ix:xx,sc:xsc});
+  }}
+  xpairs.sort(function(a,b){return b.sc.syn-a.sc.syn;});
+  var xbest=xpairs[0],xworst=xpairs[xpairs.length-1];
+  var xavg=Math.round(xpairs.reduce(function(s,p){return s+p.sc.syn;},0)/xpairs.length);
+
+  if(P.length===2){
+    d+="<p>Ce binome associe un profil <b>"+M[P[0].p].n+"</b>"+(P[0].p!==P[0].s?" nuance "+M[P[0].s].n:"")+" et un profil <b>"+M[P[1].p].n+"</b>"+(P[1].p!==P[1].s?" nuance "+M[P[1].s].n:"")+". ";
+    if(xbest.sc.syn>=70)d+="La synergie est naturellement favorable ("+xbest.sc.syn+"%) : les profils se completent bien.";
+    else if(xbest.sc.syn>=50)d+="La synergie est correcte ("+xbest.sc.syn+"%) mais demande des ajustements conscients.";
+    else d+="La synergie est exigeante ("+xbest.sc.syn+"%) : un effort delibere de communication est necessaire.";
+    d+="</p>";
+  }
+
+  d+="<p style='font-weight:bold;margin-top:12px;color:#16a34a'>Meilleure synergie : "+xbest.a.name+" ("+M[xbest.a.p].n+") et "+xbest.b.name+" ("+M[xbest.b.p].n+") — "+xbest.sc.syn+"%</p>";
+  d+="<p>Compatibilite "+xbest.sc.compat+"% | Complementarite "+xbest.sc.compl+"%. "+xbest.ix.wp+"</p>";
+
+  if(xpairs.length>1){
+    d+="<p style='font-weight:bold;margin-top:12px;color:#c53030'>Binome le plus exigeant : "+xworst.a.name+" ("+M[xworst.a.p].n+") et "+xworst.b.name+" ("+M[xworst.b.p].n+") — "+xworst.sc.syn+"%</p>";
+    d+="<p>Compatibilite "+xworst.sc.compat+"% | Complementarite "+xworst.sc.compl+"%. "+xworst.ix.wn+"</p>";
+  }
+
+  // Communication tips per person
+  d+="<p style='font-weight:bold;margin-top:12px'>Communication adaptee :</p><ul>";
+  P.forEach(function(p){d+="<li>Pour parler a <b>"+p.name+"</b> ("+M[p.p].n+") : "+M[p.p].ctip+"</li>";});
+  d+="</ul>";
+  d+="<p style='text-align:center;font-size:14pt;font-weight:bold;margin-top:16px;color:#2D7DD2'>Score de synergie moyen : "+xavg+"%</p>";
+
+  d+="<h2>4. Interactions detaillees</h2>";
+  for(var i=0;i<P.length;i++){for(var j=i+1;j<P.length;j++){var a=P[i],b=P[j],k=gk(a.p,b.p),x=IX[k],sk=gk(a.s,b.s),sc=calcSc(a,b);
+  d+="<div class='bx' style='border-left:4px solid "+M[a.p].c+"'><p style='font-size:12pt;font-weight:bold'>"+a.name+" ("+M[a.p].n+"/"+M[a.s].n+") &#10231; "+b.name+" ("+M[b.p].n+"/"+M[b.s].n+")</p>";
+  d+="<table><tr><th>Compatibilite</th><th>Complementarite</th><th>Synergie</th></tr><tr><td style='text-align:center;font-weight:bold;font-size:14pt'>"+sc.compat+"%</td><td style='text-align:center;font-weight:bold;font-size:14pt'>"+sc.compl+"%</td><td style='text-align:center;font-weight:bold;font-size:14pt;color:#2D7DD2'>"+sc.syn+"%</td></tr></table>";
+  d+="<p><b>"+x.l+"</b></p><p>"+x.dyn+"</p>";
+  d+="<p style='font-weight:bold;margin-top:8px'>Forces :</p><ul>"+x.f.map(function(f){return"<li>"+f+"</li>";}).join("")+"</ul>";
+  d+="<p style='font-weight:bold'>Risques :</p><ul>"+x.r.map(function(r){return"<li>"+r+"</li>";}).join("")+"</ul>";
+  d+="<p style='font-weight:bold'>Conseils :</p><ul>"+x.co.map(function(c){return"<li>"+c+"</li>";}).join("")+"</ul>";
+  d+="<div style='background:#f0fff4;padding:8px 12px;margin-top:8px'><p style='font-weight:bold;color:#16a34a'>Interaction positive :</p><p>"+x.wp+"</p></div>";
+  d+="<div style='background:#fff5f5;padding:8px 12px;margin-top:6px'><p style='font-weight:bold;color:#c53030'>Interaction negative :</p><p>"+x.wn+"</p></div>";
+  d+="<div style='background:#fff0f0;padding:8px 12px;margin-top:6px'><p style='font-weight:bold;color:#c0392b'>Sous stress :</p><p>"+x.sd+"</p></div>";
+  d+="<div style='background:#f0fff4;padding:8px 12px;margin-top:6px'><p style='font-weight:bold;color:#168a50'>Communication :</p><p>"+x.cd+"</p></div>";
+  d+="<div style='background:#f0f7ff;padding:8px 12px;margin-top:6px'><p style='font-weight:bold;color:#2D7DD2'>Secondaires :</p><p>"+a.name+" (sec. "+M[a.s].n+") : "+secN[a.s]+".</p><p>"+b.name+" (sec. "+M[b.s].n+") : "+secN[b.s]+".</p>"+(secT[sk]?"<p style='font-weight:bold'>"+secT[sk]+"</p>":"")+"</div></div>";}}
+  d+="<h2>5. Grille de communication</h2><table><tr><th>Profil</th><th>Ce qu'il attend</th><th>A eviter</th></tr><tr><td style='color:#E03E36;font-weight:700'>D</td><td>Concision, solutions</td><td>Tourner autour du pot</td></tr><tr><td style='color:#F5B731;font-weight:700'>I</td><td>Enthousiasme, valorisation</td><td>Froideur</td></tr><tr><td style='color:#3EAF6E;font-weight:700'>S</td><td>Patience, reassurance</td><td>Brusquer</td></tr><tr><td style='color:#2D7DD2;font-weight:700'>C</td><td>Preuves, structure</td><td>Flou, pression</td></tr></table>";
+  d+="<h2>6. Sources</h2><p style='font-size:9.5pt;color:#555'>Marston (1928) Emotions of Normal People. Geier (1979) Personal Profile System. Scullard & Baum (2015) Everything DiSC Manual, Wiley. Sugerman et al. (2011) The 8 Dimensions of Leadership. Bonnstetter & Suiter (2013) Universal Language DISC, TTI.</p>";
+  d+="<p style='font-size:9pt;color:#999;margin-top:16px;text-align:center;border-top:1px solid #eee;padding-top:8px'>Outil pedagogique — ne remplace pas un profil DISC certifie</p></body></html>";
+
+  var fn="Dynamiques_DISC_"+now.getFullYear()+"-"+(now.getMonth()+1)+"-"+now.getDate()+".doc";
+  var bl=new Blob(["\ufeff"+d],{type:"application/msword"});
+  var lk=document.createElement("a");
+  lk.href=URL.createObjectURL(bl);
+  lk.download=fn;
+  lk.style.display="none";
+  document.body.appendChild(lk);
+  lk.click();
+  setTimeout(function(){document.body.removeChild(lk);URL.revokeObjectURL(lk.href);},1000);
+  document.getElementById("eSt").textContent="Telecharge !";
+  }catch(err){document.getElementById("eSt").textContent="Erreur : "+err.message;}
+  setTimeout(function(){document.getElementById("eSt").textContent="";},4000);
+}
+
+</script>
+
+</body>
+</html>
