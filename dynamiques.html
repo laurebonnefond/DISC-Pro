@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DISC — Dynamiques d'équipe</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&display=swap');
+  :root{
+    --d:#E03E36;--i:#F5B731;--s:#3EAF6E;--c:#2D7DD2;
+    --bg:#FAFAFA;--surface:#FFF;--text:#1A1A1A;--muted:#6B7280;--border:#E5E7EB;--radius:14px;
+  }
+  @media(prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --bg:#111114;--surface:#1C1C21;--text:#E8E8EC;--muted:#9CA3AF;--border:#2D2D35;
+  }}
+  :root[data-theme="dark"]{--bg:#111114;--surface:#1C1C21;--text:#E8E8EC;--muted:#9CA3AF;--border:#2D2D35;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-padding-top:env(safe-area-inset-top,0)}
+  body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;
+    padding-top:env(safe-area-inset-top,0);padding-bottom:env(safe-area-inset-bottom,0);}
+  .container{max-width:720px;margin:0 auto;padding:20px 16px 60px;}
+  h1{font-size:1.6rem;font-weight:700;letter-spacing:-0.02em;text-align:center;margin-bottom:4px;}
+  .page-sub{text-align:center;color:var(--muted);font-size:0.92rem;margin-bottom:28px;}
+
+  /* FORM */
+  .add-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:24px;}
+  .add-section h2{font-size:1rem;font-weight:700;margin-bottom:14px;}
+  .form-grid{display:grid;gap:14px;}
+  .field{display:flex;flex-direction:column;gap:4px;}
+  .field label{font-size:0.82rem;font-weight:600;color:var(--muted);}
+  .field input{padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;background:transparent;
+    color:var(--text);font-family:inherit;font-size:0.93rem;outline:none;transition:border 0.2s;}
+  .field input:focus{border-color:var(--c);}
+  .color-row{display:flex;gap:14px;flex-wrap:wrap;}
+  .color-group{flex:1;min-width:150px;}
+  .color-group label{display:block;font-size:0.82rem;font-weight:600;color:var(--muted);margin-bottom:4px;}
+  .color-picks{display:flex;gap:6px;}
+  .color-pick{width:42px;height:42px;border-radius:10px;border:2.5px solid transparent;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;transition:all 0.15s;opacity:0.45;color:#fff;}
+  .color-pick:hover{opacity:0.75;}
+  .color-pick.active{border-color:var(--text);opacity:1;transform:scale(1.1);}
+  .color-pick.disabled{opacity:0.15;cursor:not-allowed;pointer-events:none;}
+  .add-btn{width:100%;padding:12px;border:none;border-radius:10px;background:var(--c);color:#fff;
+    font-family:inherit;font-size:0.93rem;font-weight:600;cursor:pointer;transition:all 0.2s;margin-top:4px;}
+  .add-btn:hover{filter:brightness(1.1);}
+  .add-btn:disabled{opacity:0.3;cursor:not-allowed;}
+
+  /* PEOPLE */
+  .people-list{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px;min-height:10px;}
+  .person-chip{display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:20px;
+    font-size:0.85rem;font-weight:600;color:#fff;animation:chipIn 0.25s ease;position:relative;overflow:hidden;}
+  .chip-sec{position:absolute;right:0;top:0;bottom:0;width:30%;opacity:0.5;border-radius:0 20px 20px 0;}
+  .person-chip .remove{cursor:pointer;opacity:0.7;font-size:1rem;margin-left:4px;position:relative;z-index:1;}
+  .person-chip .remove:hover{opacity:1;}
+  .chip-text{position:relative;z-index:1;}
+  @keyframes chipIn{from{opacity:0;transform:scale(0.8);}to{opacity:1;transform:scale(1);}}
+  .hint{text-align:center;color:var(--muted);font-size:0.88rem;padding:12px 0;font-style:italic;}
+
+  /* RESULTS */
+  .results{display:none;}.results.visible{display:block;}
+  .team-overview{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:20px;}
+  .team-overview h2{font-size:1.05rem;font-weight:700;margin-bottom:12px;}
+  .team-bar{display:flex;height:28px;border-radius:8px;overflow:hidden;margin-bottom:12px;}
+  .team-bar div{display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:#fff;min-width:0;transition:width 0.6s ease;}
+  .team-summary{font-size:0.9rem;line-height:1.7;}
+  .pairs-section h2{font-size:1.05rem;font-weight:700;margin-bottom:14px;}
+  .pair-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:14px;}
+  .pair-header{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
+  .pair-badge{padding:4px 10px;border-radius:14px;color:#fff;font-weight:700;font-size:0.82rem;display:inline-flex;align-items:center;gap:3px;}
+  .pair-badge .sec-dot{width:8px;height:8px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.6);}
+  .pair-arrow{color:var(--muted);font-size:1rem;}
+  .compat-meter{display:flex;align-items:center;gap:8px;margin-left:auto;}
+  .compat-dots{display:flex;gap:3px;}
+  .compat-dot{width:10px;height:10px;border-radius:50%;background:var(--border);}
+  .compat-dot.fill{background:#16a34a;}
+  .compat-label{font-size:0.78rem;font-weight:600;min-width:55px;text-align:right;}
+  .pair-body h3{font-size:0.9rem;font-weight:700;margin:10px 0 4px;}
+  .pair-body p{font-size:0.88rem;line-height:1.6;}
+  .pair-body ul{margin:4px 0 0 18px;font-size:0.86rem;}
+  .pair-body ul li{margin-bottom:3px;}
+  .nuance-box{background:color-mix(in srgb,var(--c) 6%,transparent);border:1px solid color-mix(in srgb,var(--c) 20%,transparent);
+    border-radius:10px;padding:14px 16px;margin-top:12px;}
+  .nuance-box h4{font-size:0.88rem;font-weight:700;margin-bottom:4px;color:var(--c);}
+  .nuance-box p{font-size:0.85rem;}
+
+  .export-section{text-align:center;margin-top:28px;}
+  .export-btn{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border-radius:10px;border:none;
+    background:var(--c);color:#fff;font-family:inherit;font-size:0.93rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+  .export-btn:hover{filter:brightness(1.1);}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <h1>DISC — Dynamiques d'équipe</h1>
+  <p class="page-sub">Analyse les interactions en tenant compte des profils dominant + secondaire</p>
+
+  <div class="add-section">
+    <h2>Ajouter une personne</h2>
+    <div class="form-grid">
+      <div class="field">
+        <label>Prénom</label>
+        <input type="text" id="inpName" placeholder="Ex : Laure" maxlength="30">
+      </div>
+      <div class="color-row">
+        <div class="color-group">
+          <label>Couleur dominante</label>
+          <div class="color-picks" id="pickPrim">
+            <div class="color-pick" data-d="D" style="background:var(--d)" onclick="pick('prim','D',this)">D</div>
+            <div class="color-pick" data-d="I" style="background:var(--i)" onclick="pick('prim','I',this)">I</div>
+            <div class="color-pick" data-d="S" style="background:var(--s)" onclick="pick('prim','S',this)">S</div>
+            <div class="color-pick" data-d="C" style="background:var(--c)" onclick="pick('prim','C',this)">C</div>
+          </div>
+        </div>
+        <div class="color-group">
+          <label>Couleur secondaire</label>
+          <div class="color-picks" id="pickSec">
+            <div class="color-pick" data-d="D" style="background:var(--d)" onclick="pick('sec','D',this)">D</div>
+            <div class="color-pick" data-d="I" style="background:var(--i)" onclick="pick('sec','I',this)">I</div>
+            <div class="color-pick" data-d="S" style="background:var(--s)" onclick="pick('sec','S',this)">S</div>
+            <div class="color-pick" data-d="C" style="background:var(--c)" onclick="pick('sec','C',this)">C</div>
+          </div>
+        </div>
+      </div>
+      <button class="add-btn" id="addBtn" onclick="addPerson()" disabled>Ajouter</button>
+    </div>
+  </div>
+
+  <div class="people-list" id="peopleList"></div>
+  <div class="hint" id="hint">Ajoute au moins 2 personnes pour voir les dynamiques.</div>
+
+  <div class="results" id="results">
+    <div class="team-overview" id="teamOverview"></div>
+    <div class="pairs-section" id="pairsSection"></div>
+    <div class="export-section">
+      <button class="export-btn" onclick="doExport()">📄 Exporter en Word</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const M={
+  D:{name:"Dominance",color:"#E03E36",emoji:"🔴",short:"Direct, décisif, orienté résultats"},
+  I:{name:"Influence",color:"#F5B731",emoji:"🟡",short:"Enthousiaste, sociable, créatif"},
+  S:{name:"Stabilité",color:"#3EAF6E",emoji:"🟢",short:"Patient, fiable, à l'écoute"},
+  C:{name:"Conformité",color:"#2D7DD2",emoji:"🔵",short:"Méthodique, rigoureux, analytique"}
+};
+
+const IX={
+  "D-D":{c:3,l:"Duo de choc… ou de chocs",
+    dyn:"Deux D créent une énergie d'action intense. Objectif commun = machine de guerre. Objectifs divergents = bras de fer.",
+    f:["Décisions ultra-rapides","Forte capacité d'exécution","Zéro hésitation"],
+    r:["Lutte de pouvoir","Écoute insuffisante","Pas de recul stratégique"],
+    co:["Définir les zones de responsabilité","Mécanisme d'arbitrage (données, tiers)","S'écouter AVANT de trancher"],
+    pro:"En réunion : peuvent écraser les autres profils. Prévoir un modérateur."},
+  "D-I":{c:4,l:"Duo visionnaire",
+    dyn:"Le D donne la direction, le I donne l'adhésion. Ensemble ils lancent et vendent des projets avec une force redoutable.",
+    f:["Lancement de projets dynamique","Entraînent les autres","Action + communication"],
+    r:["Manque de suivi dans les détails","Décisions trop rapides","Le I peut se sentir écrasé"],
+    co:["S'entourer d'un S ou C pour le suivi","Le D doit valoriser les idées du I","Formaliser les décisions par écrit"],
+    pro:"Duo très visible en réunion, peut monopoliser. Inclure S et C."},
+  "D-S":{c:3,l:"Complémentaires sous conditions",
+    dyn:"Le D pousse, le S stabilise et humanise. Fonctionne si le D respecte le rythme du S, et si le S ose s'affirmer.",
+    f:["Équilibre action / relation","Le S tempère l'impulsivité du D","Le D sort le S de sa zone de confort"],
+    r:["Le D peut brusquer le S","Le S accumule du ressentiment silencieux","Rythmes opposés"],
+    co:["Le D doit demander l'avis ET attendre la réponse","Le S doit exprimer son désaccord tôt","Signaux convenus si l'un va trop vite"],
+    pro:"Le D décide, le S adhère en surface. Vérifier l'alignement réel."},
+  "D-C":{c:3,l:"Efficacité vs précision",
+    dyn:"Le D veut vite, le C veut bien. Tension productive : le C empêche le D de foncer dans le mur, le D empêche le C de sur-analyser.",
+    f:["Résultats de qualité","Le C apporte la rigueur","Le D apporte la vitesse"],
+    r:["Le D trouve le C trop lent","Le C trouve le D impulsif","Frustration mutuelle sur le tempo"],
+    co:["Convenir du niveau de qualité attendu","Le C priorise ses remarques","Le D reconnaît la valeur du fond"],
+    pro:"En projet : C prépare, D exécute. Inverser ces rôles génère du conflit."},
+  "I-I":{c:4,l:"Festival d'idées",
+    dyn:"Énergie débordante, idées fusent, ambiance au top. Risque : rien ne se concrétise sans rails.",
+    f:["Brainstorming prolifique","Ambiance motivante","Innovation et pensée latérale"],
+    r:["Dispersion totale","Aucun suivi des décisions","Chacun parle, personne ne structure"],
+    co:["Plan d'action écrit avec deadlines","Inviter un C ou S pour ancrer","Se challenger sur le suivi"],
+    pro:"Excellent en brainstorm. Risqué en exécution sans cadre."},
+  "I-S":{c:5,l:"Alliance naturelle",
+    dyn:"Un des duos les plus fluides du DISC. Le I apporte l'élan, le S la stabilité. Relation chaleureuse et productive.",
+    f:["Communication facile et bienveillante","Le I dynamise, le S ancre","Forte cohésion relationnelle"],
+    r:["Évitement des sujets difficiles","Manque de confrontation constructive","Décisions « pour la paix » plutôt qu'efficaces"],
+    co:["Oser aborder les désaccords frontalement","Le I ne doit pas confondre silence et accord","Le S doit exprimer ses besoins"],
+    pro:"Idéal pour accompagnement, formation, médiation. Moins pour les décisions brutales."},
+  "I-C":{c:2,l:"Tension créative",
+    dyn:"Le duo le plus polarisé. Le I fonctionne à l'émotion, le C aux faits. Quand ils se comprennent = puissant. Sinon = incompréhension.",
+    f:["Le I humanise le travail du C","Le C structure les idées du I","Vision + rigueur si alignés"],
+    r:["Le I trouve le C froid","Le C trouve le I superficiel","Styles de communication opposés"],
+    co:["Le I prépare ses arguments avec des données","Le C valorise avant de critiquer","Langage commun : schémas, visuels"],
+    pro:"Éviter en binôme sans médiateur. Excellent en équipe avec un S comme pont."},
+  "S-S":{c:4,l:"Havre de paix",
+    dyn:"Environnement serein, coopératif et stable. Harmonie naturelle. Risque : l'immobilisme.",
+    f:["Ambiance de travail idéale","Fiabilité et régularité","Écoute mutuelle exemplaire"],
+    r:["Évitement systématique du conflit","Difficulté à trancher","Résistance au changement"],
+    co:["Se donner la permission de dire non","Deadlines de décision fermes","Le désaccord ≠ rupture"],
+    pro:"Solide pour le suivi opérationnel. A besoin d'un D ou I pour l'élan."},
+  "S-C":{c:4,l:"Duo fiabilité",
+    dyn:"Le S apporte l'humain, le C la méthode. Travail de grande qualité, fiable et bien pensé.",
+    f:["Haute qualité","Processus bien huilés","Ambiance calme et pro"],
+    r:["Lenteur au démarrage","Manque d'audace","Opportunités ratées par prudence"],
+    co:["Critères de déclenchement clairs","Le S aide le C à communiquer avec chaleur","Le C aide le S à objectiver"],
+    pro:"Idéal pour qualité, audit, processus. Moins pour l'innovation rapide."},
+  "C-C":{c:3,l:"Laboratoire de précision",
+    dyn:"Rigueur et qualité exceptionnelles. Mais le perfectionnisme combiné peut devenir paralysant.",
+    f:["Excellence technique","Analyse approfondie","Détection des erreurs"],
+    r:["Paralysie par l'analyse","Perfectionnisme sans limite","Manque d'élan"],
+    co:["Définir le « good enough » dès le départ","Alterner analyse et livraison","S'entourer d'un I ou D pour lancer"],
+    pro:"Parfait pour R&D, data, audit. Déconseillé pour pilotage sous contrainte temps."}
+};
+
+/* Secondary color nuances — how a secondary modifies the primary interaction */
+const secNuances={
+  D:"apporte un côté combatif et orienté action — pousse à accélérer, cherche le résultat concret, peut générer de l'impatience",
+  I:"apporte un côté chaleureux et communicatif — facilite la relation, crée du lien, mais peut disperser l'attention",
+  S:"apporte un côté stabilisateur et empathique — tempère les excès, favorise l'écoute, mais peut ralentir la prise de décision",
+  C:"apporte un côté analytique et exigeant — renforce la rigueur, questionne les faiblesses, mais peut freiner la spontanéité"
+};
+
+const secTips={
+  "D-D":"Deux secondaires D amplifient la compétition. Canaliser vers un objectif commun.",
+  "D-I":"Le secondaire D accélère, le secondaire I communique. Bon équilibre d'énergie.",
+  "D-S":"Tension interne : le D-secondaire veut foncer, le S-secondaire veut sécuriser. Alterner les rythmes.",
+  "D-C":"Le D-secondaire pousse à trancher, le C-secondaire à vérifier. Peut créer un cycle « accélérer-freiner ».",
+  "I-I":"Double secondaire I = beaucoup de parole, peu de structure. Nommer un time-keeper.",
+  "I-S":"Le I-secondaire ouvre la discussion, le S-secondaire écoute. Duo harmonieux en sous-couche.",
+  "I-C":"Le I-secondaire veut partager, le C-secondaire veut analyser seul. Respecter les temps de chacun.",
+  "S-S":"Double secondaire S = forte résistance au changement. Introduire les nouveautés progressivement.",
+  "S-C":"Le S-secondaire cherche l'harmonie, le C-secondaire la perfection. Convergence vers un travail soigné mais lent.",
+  "C-C":"Double secondaire C = exigence maximale. Attention au perfectionnisme mutuel — définir des critères d'arrêt."
+};
+
+function gk(a,b){return [a,b].sort().join('-');}
+
+/* ═══ STATE ═══ */
+let people=[], selPrim=null, selSec=null;
+
+document.getElementById('inpName').addEventListener('input',checkReady);
+document.getElementById('inpName').addEventListener('keydown',e=>{if(e.key==='Enter')addPerson();});
+
+function pick(which,dim,el){
+  if(which==='prim'){
+    document.querySelectorAll('#pickPrim .color-pick').forEach(c=>c.classList.remove('active'));
+    el.classList.add('active'); selPrim=dim;
+    // disable same in sec
+    document.querySelectorAll('#pickSec .color-pick').forEach(c=>{
+      c.classList.toggle('disabled',c.dataset.d===dim);
+      if(c.dataset.d===dim && selSec===dim){c.classList.remove('active');selSec=null;}
+    });
+  } else {
+    if(dim===selPrim)return;
+    document.querySelectorAll('#pickSec .color-pick').forEach(c=>c.classList.remove('active'));
+    el.classList.add('active'); selSec=dim;
+  }
+  checkReady();
+}
+
+function checkReady(){
+  document.getElementById('addBtn').disabled=!(document.getElementById('inpName').value.trim()&&selPrim&&selSec);
+}
+
+function addPerson(){
+  const name=document.getElementById('inpName').value.trim();
+  if(!name||!selPrim||!selSec||people.length>=8)return;
+  people.push({name,p:selPrim,s:selSec});
+  document.getElementById('inpName').value='';
+  [selPrim,selSec]=[null,null];
+  document.querySelectorAll('.color-pick').forEach(c=>{c.classList.remove('active');c.classList.remove('disabled');});
+  checkReady(); renderPeople();
+  if(people.length>=2)renderResults();
+  document.getElementById('inpName').focus();
+}
+
+function removePerson(i){
+  people.splice(i,1);renderPeople();
+  if(people.length>=2)renderResults();
+  else document.getElementById('results').classList.remove('visible');
+}
+
+function renderPeople(){
+  document.getElementById('peopleList').innerHTML=people.map((p,i)=>
+    `<span class="person-chip" style="background:${M[p.p].color}">
+      <span class="chip-sec" style="background:${M[p.s].color}"></span>
+      <span class="chip-text">${M[p.p].emoji} ${p.name} <small style="opacity:0.8">(${p.p}/${p.s})</small></span>
+      <span class="remove" onclick="removePerson(${i})">✕</span></span>`).join('');
+  document.getElementById('hint').style.display=people.length>=2?'none':'block';
+}
+
+/* ═══ RENDER ═══ */
+function renderResults(){
+  document.getElementById('results').classList.add('visible');
+  renderTeam(); renderPairs();
+}
+
+function renderTeam(){
+  const ct={D:0,I:0,S:0,C:0};
+  people.forEach(p=>{ct[p.p]++;ct[p.s]+=0.5;}); // sec counts half
+  const tot=Object.values(ct).reduce((a,b)=>a+b,0);
+  const pct=k=>Math.round(ct[k]/tot*100);
+
+  let bar='';['D','I','S','C'].forEach(k=>{
+    if(ct[k]>0)bar+=`<div style="width:${pct(k)}%;background:${M[k].color}">${pct(k)}%</div>`;
+  });
+
+  const primCounts={D:0,I:0,S:0,C:0};people.forEach(p=>primCounts[p.p]++);
+  const missing=['D','I','S','C'].filter(k=>primCounts[k]===0).map(k=>M[k].emoji+' '+M[k].name);
+  const over=['D','I','S','C'].filter(k=>primCounts[k]>=Math.ceil(people.length*0.5)).map(k=>M[k].emoji+' '+M[k].name);
+
+  let diag='';
+  if(missing.length)diag+=`<br>⚠️ <strong>Absent en dominant :</strong> ${missing.join(', ')}`;
+  if(over.length)diag+=`<br>📊 <strong>Surreprésenté :</strong> ${over.join(', ')}`;
+  if(!missing.length&&!over.length)diag+=`<br>✅ <strong>Équipe équilibrée</strong>`;
+
+  // Check if secondaries compensate
+  const secComp=missing.filter(m=>{const k=['D','I','S','C'].find(k=>M[k].emoji+' '+M[k].name===m);return people.some(p=>p.s===k);});
+  if(secComp.length)diag+=`<br>🔄 <strong>Compensé par les secondaires :</strong> ${secComp.join(', ')} — présent en couleur secondaire`;
+
+  document.getElementById('teamOverview').innerHTML=`
+    <h2>Vue d'ensemble (${people.length} personnes)</h2>
+    <div class="team-bar">${bar}</div>
+    <p style="font-size:0.82rem;color:var(--muted);margin-bottom:10px;">Pondération : dominante = 1, secondaire = 0.5</p>
+    <div class="team-summary">
+      ${people.map(p=>`${M[p.p].emoji} <strong>${p.name}</strong> : ${M[p.p].name}-${M[p.s].name}`).join(' · ')}
+      ${diag}
+    </div>`;
+}
+
+function renderPairs(){
+  const sec=document.getElementById('pairsSection');
+  let html='<h2>Interactions par binôme</h2>';
+
+  for(let i=0;i<people.length;i++){
+    for(let j=i+1;j<people.length;j++){
+      const a=people[i],b=people[j];
+      const key=gk(a.p,b.p);
+      const ix=IX[key];
+      const dots=Array.from({length:5},(_,k)=>`<div class="compat-dot${k<ix.c?' fill':''}"></div>`).join('');
+      const labs=['','Difficile','Tendu','Correct','Bon','Excellent'];
+
+      // Secondary nuance
+      const secKey=gk(a.s,b.s);
+      const secTip=secTips[secKey]||'';
+
+      html+=`<div class="pair-card">
+        <div class="pair-header">
+          <span class="pair-badge" style="background:${M[a.p].color}">${M[a.p].emoji} ${a.name} <span class="sec-dot" style="background:${M[a.s].color}"></span></span>
+          <span class="pair-arrow">⟷</span>
+          <span class="pair-badge" style="background:${M[b.p].color}">${M[b.p].emoji} ${b.name} <span class="sec-dot" style="background:${M[b.s].color}"></span></span>
+          <div class="compat-meter">
+            <div class="compat-dots">${dots}</div>
+            <span class="compat-label">${labs[ix.c]}</span>
+          </div>
+        </div>
+        <div class="pair-body">
+          <p><strong>${ix.l}</strong> <span style="font-size:0.82rem;color:var(--muted);">(${M[a.p].name} ↔ ${M[b.p].name})</span></p>
+          <p>${ix.dyn}</p>
+          <h3>✅ Forces</h3><ul>${ix.f.map(f=>'<li>'+f+'</li>').join('')}</ul>
+          <h3>⚠️ Risques</h3><ul>${ix.r.map(r=>'<li>'+r+'</li>').join('')}</ul>
+          <h3>💡 Conseils</h3><ul>${ix.co.map(c=>'<li>'+c+'</li>').join('')}</ul>
+          <p style="margin-top:6px;font-size:0.85rem;color:var(--muted);">📋 ${ix.pro}</p>
+
+          <div class="nuance-box">
+            <h4>🎨 Nuance des couleurs secondaires</h4>
+            <p><strong>${a.name}</strong> (secondaire ${M[a.s].emoji} ${M[a.s].name}) : ${secNuances[a.s]}.</p>
+            <p><strong>${b.name}</strong> (secondaire ${M[b.s].emoji} ${M[b.s].name}) : ${secNuances[b.s]}.</p>
+            ${secTip?`<p style="margin-top:6px;font-weight:600;">→ ${secTip}</p>`:''}
+          </div>
+        </div>
+      </div>`;
+    }
+  }
+  sec.innerHTML=html;
+}
+
+/* ═══ EXPORT ═══ */
+function doExport(){
+  const now=new Date();
+  const ds=now.toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+
+  let pairsDoc='';
+  for(let i=0;i<people.length;i++){
+    for(let j=i+1;j<people.length;j++){
+      const a=people[i],b=people[j],key=gk(a.p,b.p),ix=IX[key],sk=gk(a.s,b.s);
+      const stars='●'.repeat(ix.c)+'○'.repeat(5-ix.c);
+      pairsDoc+=`
+      <div style="border:1px solid #ddd;border-left:4px solid ${M[a.p].color};padding:14px 16px;margin:12px 0;page-break-inside:avoid;">
+        <p style="font-size:12pt;font-weight:bold;">
+          <span style="color:${M[a.p].color};">■</span> ${a.name} (${M[a.p].name}/${M[a.s].name})
+          ⟷
+          <span style="color:${M[b.p].color};">■</span> ${b.name} (${M[b.p].name}/${M[b.s].name})
+          &nbsp;${stars}
+        </p>
+        <p><strong>${ix.l}</strong></p><p>${ix.dyn}</p>
+        <p style="font-weight:bold;margin-top:8px;">Forces :</p><ul>${ix.f.map(f=>'<li>'+f+'</li>').join('')}</ul>
+        <p style="font-weight:bold;">Risques :</p><ul>${ix.r.map(r=>'<li>'+r+'</li>').join('')}</ul>
+        <p style="font-weight:bold;">Conseils :</p><ul>${ix.co.map(c=>'<li>'+c+'</li>').join('')}</ul>
+        <p style="font-size:9.5pt;color:#555;">${ix.pro}</p>
+        <div style="background:#f0f7ff;border:1px solid #d0e3f7;padding:10px 14px;margin-top:10px;border-radius:4px;">
+          <p style="font-weight:bold;color:#2D7DD2;font-size:10pt;">Nuance des secondaires</p>
+          <p style="font-size:10pt;">${a.name} (sec. ${M[a.s].name}) : ${secNuances[a.s]}.</p>
+          <p style="font-size:10pt;">${b.name} (sec. ${M[b.s].name}) : ${secNuances[b.s]}.</p>
+          ${secTips[sk]?`<p style="font-size:10pt;font-weight:bold;margin-top:4px;">→ ${secTips[sk]}</p>`:''}
+        </div>
+      </div>`;
+    }
+  }
+
+  const doc=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+<head><meta charset="utf-8"><style>
+@page{size:A4;margin:2cm 2.5cm;}body{font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#1a1a1a;line-height:1.6;}
+h1{font-size:20pt;color:#2D7DD2;border-bottom:3px solid #2D7DD2;padding-bottom:6px;}h2{font-size:14pt;margin-top:20px;border-bottom:1px solid #ddd;padding-bottom:4px;}
+.meta{font-size:10pt;color:#666;margin-bottom:16px;}table{border-collapse:collapse;width:100%;margin:10px 0;}
+td,th{border:1px solid #ccc;padding:7px 12px;font-size:10.5pt;}th{background:#f0f4f8;font-weight:700;text-align:left;}
+ul{margin:4px 0 4px 20px;}li{margin-bottom:2px;}.src{font-size:9.5pt;color:#555;margin-top:20px;border-top:1px solid #ddd;padding-top:10px;}
+.ft{font-size:8.5pt;color:#999;margin-top:30px;text-align:center;border-top:1px solid #eee;padding-top:8px;}
+</style></head><body>
+<h1>Dynamiques d'équipe DISC</h1>
+<p class="meta"><strong>Date :</strong> ${ds} | <strong>Participants :</strong> ${people.map(p=>p.name+' ('+M[p.p].name+'/'+M[p.s].name+')').join(', ')}</p>
+
+<h2>1. Composition</h2>
+<table><tr><th>Nom</th><th>Dominante</th><th>Secondaire</th><th>Profil</th></tr>
+${people.map(p=>`<tr><td>${p.name}</td><td style="color:${M[p.p].color};font-weight:700;">${M[p.p].emoji} ${M[p.p].name}</td><td style="color:${M[p.s].color};font-weight:700;">${M[p.s].emoji} ${M[p.s].name}</td><td>${M[p.p].short} avec un côté ${M[p.s].short.toLowerCase()}</td></tr>`).join('')}
+</table>
+
+<h2>2. Interactions</h2>
+${pairsDoc}
+
+<h2>3. Communiquer avec chaque profil</h2>
+<table><tr><th>Profil</th><th>Ce qu'il attend</th><th>À éviter</th></tr>
+<tr><td style="color:#E03E36;font-weight:700;">🔴 D</td><td>Aller droit au but, proposer des solutions, être concis</td><td>Tourner autour du pot, submerger de détails</td></tr>
+<tr><td style="color:#F5B731;font-weight:700;">🟡 I</td><td>Être enthousiaste, valoriser, raconter une histoire</td><td>Être froid, uniquement factuel</td></tr>
+<tr><td style="color:#3EAF6E;font-weight:700;">🟢 S</td><td>Être patient, rassurant, donner du temps</td><td>Brusquer, imposer sans explication</td></tr>
+<tr><td style="color:#2D7DD2;font-weight:700;">🔵 C</td><td>Fournir des preuves, être structuré</td><td>Être vague, approximatif, pressant</td></tr></table>
+
+<h2>4. Méthodologie et sources</h2>
+<div class="src">
+<p><strong>Fondement :</strong> modèle DISC de <strong>William Moulton Marston</strong> (<em>Emotions of Normal People</em>, 1928). Quatre dimensions comportementales liées à la perception de l'environnement (favorable/hostile) et au positionnement (actif/passif).</p>
+<p><strong>Instruments :</strong> <strong>Walter V. Clarke</strong> (Activity Vector Analysis, années 1950), puis <strong>John G. Geier, Ph.D.</strong> (Personal Profile System, Université du Minnesota, années 1970, Performax → Inscape → Wiley).</p>
+<p><strong>Interactions inter-profils :</strong></p>
+<ul>
+<li>Scullard, M. & Baum, D. (2015). <em>Everything DiSC Manual</em>. Wiley.</li>
+<li>Sugerman, J., Scullard, M. & Wilhelm, E. (2011). <em>The 8 Dimensions of Leadership</em>. Berrett-Koehler.</li>
+<li>Bonnstetter, B. J. & Suiter, J. I. (2013). <em>The Universal Language DISC</em>. TTI Success Insights.</li>
+<li>Rohm, R. A. (2013). <em>Positive Personality Profiles</em>. Personality Insights Press.</li>
+<li>Thomas International (2004). <em>Using DISC to develop leadership and teamwork</em>.</li>
+</ul>
+<p><strong>Approche « profil composite » :</strong> la prise en compte de la couleur secondaire s'appuie sur la méthodologie des « 8 dimensions du leadership » (Sugerman et al., 2011) qui positionne chaque individu entre deux dimensions adjacentes du modèle DISC, créant 8 sous-profils nuancés plutôt que 4 catégories brutes.</p>
+<p><strong>Limites :</strong> outil pédagogique d'aide à la communication. Ne remplace pas un profil DISC certifié (Wiley, Thomas, TTI) ni un bilan psychologique.</p>
+</div>
+
+<div class="ft">Rapport généré le ${ds} — Outil d'analyse des dynamiques DISC à visée pédagogique</div>
+</body></html>`;
+
+  const filename=`Dynamiques_DISC_${ds.replace(/\s+/g,'_')}.doc`;
+  const blob=new Blob(['\ufeff'+doc],{type:'application/msword'});
+  const u=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=u;a.download=filename;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(u);
+}
+</script>
+</body>
+</html>

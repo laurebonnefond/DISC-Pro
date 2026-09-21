@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Test DISC — Profil Comportemental</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&display=swap');
+  :root {
+    --d:#E03E36; --i:#F5B731; --s:#3EAF6E; --c:#2D7DD2;
+    --bg:#FAFAFA; --surface:#FFF; --text:#1A1A1A; --muted:#6B7280; --border:#E5E7EB; --radius:14px;
+  }
+  @media(prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --bg:#111114;--surface:#1C1C21;--text:#E8E8EC;--muted:#9CA3AF;--border:#2D2D35;
+  }}
+  :root[data-theme="dark"]{--bg:#111114;--surface:#1C1C21;--text:#E8E8EC;--muted:#9CA3AF;--border:#2D2D35;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-padding-top:env(safe-area-inset-top,0)}
+  body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;
+    padding-top:env(safe-area-inset-top,0);padding-bottom:env(safe-area-inset-bottom,0);}
+  .container{max-width:680px;margin:0 auto;padding:24px 16px 60px;}
+
+  /* INTRO */
+  .intro{text-align:center;margin-bottom:32px;}
+  .intro h1{font-size:1.8rem;font-weight:700;letter-spacing:-0.02em;margin-bottom:6px;}
+  .disc-dots{display:flex;justify-content:center;gap:8px;margin:12px 0 16px;}
+  .disc-dots span{width:14px;height:14px;border-radius:50%;display:inline-block;}
+  .intro p{color:var(--muted);font-size:0.95rem;max-width:520px;margin:0 auto;}
+  .name-input-wrap{margin:24px auto 0;max-width:340px;}
+  .name-input-wrap label{display:block;font-weight:600;font-size:0.9rem;margin-bottom:6px;text-align:left;}
+  .name-input{width:100%;padding:12px 16px;border:1.5px solid var(--border);border-radius:10px;
+    background:var(--surface);color:var(--text);font-family:inherit;font-size:1rem;outline:none;transition:border 0.2s;}
+  .name-input:focus{border-color:var(--c);}
+  .start-btn{display:block;margin:20px auto 0;padding:14px 48px;border:none;border-radius:10px;
+    background:linear-gradient(135deg,var(--d),var(--i));color:#fff;font-family:inherit;font-size:1rem;
+    font-weight:700;cursor:pointer;transition:transform 0.15s;}
+  .start-btn:hover{transform:scale(1.03);}
+  .start-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+
+  /* PROGRESS */
+  .progress-wrap{margin-bottom:28px;}
+  .progress-info{display:flex;justify-content:space-between;font-size:0.82rem;color:var(--muted);margin-bottom:6px;font-weight:500;}
+  .progress-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--d),var(--i),var(--s),var(--c));border-radius:3px;transition:width 0.4s ease;}
+
+  /* QUESTION */
+  .question-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px 24px;margin-bottom:20px;}
+  .question-card h2{font-size:1.05rem;font-weight:600;margin-bottom:20px;line-height:1.5;}
+  .options{display:flex;flex-direction:column;gap:10px;}
+  .option-btn{display:block;width:100%;text-align:left;padding:14px 18px;border:1.5px solid var(--border);
+    border-radius:10px;background:transparent;color:var(--text);font-family:inherit;font-size:0.93rem;
+    cursor:pointer;transition:all 0.2s;line-height:1.45;}
+  .option-btn:hover{border-color:var(--c);background:color-mix(in srgb,var(--c) 6%,transparent);}
+  .option-btn.selected{border-color:var(--c);background:color-mix(in srgb,var(--c) 10%,transparent);font-weight:500;}
+
+  /* NAV */
+  .nav-row{display:flex;justify-content:space-between;gap:12px;margin-top:8px;}
+  .nav-btn{padding:12px 28px;border-radius:10px;font-family:inherit;font-size:0.93rem;font-weight:600;cursor:pointer;border:none;transition:all 0.2s;}
+  .nav-btn.prev{background:var(--surface);border:1.5px solid var(--border);color:var(--text);}
+  .nav-btn.next{background:var(--c);color:#fff;margin-left:auto;}
+  .nav-btn:disabled{opacity:0.35;cursor:not-allowed;}
+  .nav-btn.next:hover:not(:disabled){filter:brightness(1.1);}
+
+  /* RESULTS */
+  .results{display:none;}.results.visible{display:block;}
+  .result-header{text-align:center;margin-bottom:32px;}
+  .result-header h1{font-size:1.6rem;font-weight:700;margin-bottom:4px;}
+  .result-header .name-line{font-size:1.1rem;color:var(--muted);margin-bottom:10px;}
+  .dominant-badge{display:inline-block;padding:6px 20px;border-radius:20px;color:#fff;font-weight:700;font-size:1.1rem;margin:10px 0;}
+  .radar-wrap{display:flex;justify-content:center;margin:24px 0 32px;}
+  .score-bars{display:flex;flex-direction:column;gap:14px;margin-bottom:32px;}
+  .score-row{display:flex;align-items:center;gap:12px;}
+  .score-label{min-width:110px;font-weight:600;font-size:0.9rem;}
+  .score-track{flex:1;height:22px;background:var(--border);border-radius:11px;overflow:hidden;}
+  .score-fill{height:100%;border-radius:11px;transition:width 1s ease;}
+  .score-pct{min-width:42px;text-align:right;font-weight:700;font-size:0.95rem;}
+  .profile-details{display:grid;gap:16px;}
+  .detail-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 20px;border-left:4px solid transparent;}
+  .detail-card h3{font-size:1rem;font-weight:700;margin-bottom:4px;}
+  .detail-card .subtitle{font-size:0.82rem;color:var(--muted);margin-bottom:10px;font-weight:500;}
+  .detail-card p{font-size:0.9rem;line-height:1.6;}
+  .detail-card ul{margin:8px 0 0 18px;font-size:0.88rem;}
+  .detail-card ul li{margin-bottom:4px;}
+
+  /* EXPORT */
+  .export-section{margin-top:32px;text-align:center;padding:24px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);}
+  .export-section h3{font-size:1rem;font-weight:700;margin-bottom:14px;}
+  .export-btn{display:inline-flex;align-items:center;gap:8px;padding:12px 32px;border-radius:10px;border:none;
+    background:var(--c);color:#fff;font-family:inherit;font-size:0.95rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+  .export-btn:hover{filter:brightness(1.1);}
+  .export-btn svg{width:18px;height:18px;fill:currentColor;}
+
+  .reset-btn{display:block;margin:24px auto 0;padding:12px 36px;border-radius:10px;border:1.5px solid var(--border);
+    background:var(--surface);color:var(--text);font-family:inherit;font-size:0.93rem;font-weight:600;cursor:pointer;}
+  .hidden{display:none!important;}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- INTRO -->
+  <div id="screen-intro" class="intro">
+    <h1>Test DISC</h1>
+    <div class="disc-dots">
+      <span style="background:var(--d)"></span>
+      <span style="background:var(--i)"></span>
+      <span style="background:var(--s)"></span>
+      <span style="background:var(--c)"></span>
+    </div>
+    <p style="font-size:1rem;color:var(--text);font-weight:500;margin-bottom:12px;">Découvre ton profil comportemental en 24 situations</p>
+    <p>Pour chaque situation, choisis la réaction qui te correspond le plus spontanément — pas celle qui te semble « idéale ». Il n'y a aucune mauvaise réponse.</p>
+    <p style="margin-top:12px;font-size:0.85rem;">⏱ Environ 5 minutes</p>
+    <div class="name-input-wrap">
+      <label for="userName">Ton prénom (pour personnaliser le rapport) :</label>
+      <input type="text" id="userName" class="name-input" placeholder="Ex : Laure" maxlength="40">
+    </div>
+    <button class="start-btn" id="startBtn" onclick="startTest()">Commencer le test</button>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="screen-quiz" class="hidden">
+    <div class="progress-wrap">
+      <div class="progress-info"><span id="q-counter"></span><span id="q-pct"></span></div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+    <div class="question-card">
+      <h2 id="q-text"></h2>
+      <div class="options" id="q-options"></div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn prev" id="btn-prev" onclick="prevQ()">← Précédent</button>
+      <button class="nav-btn next" id="btn-next" onclick="nextQ()" disabled>Suivant →</button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="screen-results" class="results">
+    <div class="result-header">
+      <h1>Résultats DISC</h1>
+      <div class="name-line" id="result-name"></div>
+      <div class="dominant-badge" id="dominant-badge"></div>
+    </div>
+    <div class="radar-wrap"><canvas id="radar" width="300" height="300"></canvas></div>
+    <div class="score-bars" id="score-bars"></div>
+    <div class="profile-details" id="profile-details"></div>
+
+    <div class="export-section">
+      <h3>Exporter ton rapport personnalisé</h3>
+      <button class="export-btn" onclick="exportWord()">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zM6 20V4h7v5h5v11H6zm2-6h8v1.5H8V14zm0-3h8v1.5H8V11zm0 6h5v1.5H8V17z"/></svg>
+        Télécharger le rapport Word (.doc)
+      </button>
+    </div>
+    <button class="reset-btn" onclick="resetTest()">Refaire le test</button>
+  </div>
+</div>
+
+<script>
+/* ── DATA ── */
+const questions=[
+  {text:"On te confie un projet urgent avec une deadline très serrée. Tu :",opts:[{t:"Tu prends les rênes, répartis les tâches et fonces",d:"D"},{t:"Tu motives l'équipe en rendant le défi excitant",d:"I"},{t:"Tu organises calmement un planning réaliste étape par étape",d:"S"},{t:"Tu analyses d'abord les risques avant de t'engager",d:"C"}]},
+  {text:"Lors d'une réunion, deux collègues s'affrontent sur une décision. Tu :",opts:[{t:"Tu tranches rapidement pour avancer",d:"D"},{t:"Tu détends l'atmosphère avec humour puis cherches un consensus",d:"I"},{t:"Tu écoutes les deux parties et cherches un compromis",d:"S"},{t:"Tu demandes des données pour éclairer objectivement le débat",d:"C"}]},
+  {text:"Face à un changement soudain de plan, ta première réaction :",opts:[{t:"Tu t'adaptes vite et vois ça comme une opportunité",d:"D"},{t:"Tu en parles autour de toi pour voir le bon côté des choses",d:"I"},{t:"Tu as besoin d'un temps d'adaptation et de comprendre pourquoi",d:"S"},{t:"Tu analyses l'impact du changement avant de réagir",d:"C"}]},
+  {text:"On te demande de présenter un bilan devant 30 personnes. Tu :",opts:[{t:"Pas de stress, tu maîtrises ton sujet et tu fonces",d:"D"},{t:"Tu adores ça : tu prépares un show captivant",d:"I"},{t:"Tu te prépares minutieusement pour te sentir en sécurité",d:"S"},{t:"Tu construis un support ultra-structuré avec des chiffres clés",d:"C"}]},
+  {text:"Tu dois prendre une décision importante sans avoir toutes les informations. Tu :",opts:[{t:"Tu décides avec ce que tu as — l'action prime",d:"D"},{t:"Tu consultes ton réseau pour avoir des avis rapides",d:"I"},{t:"Tu préfères attendre d'avoir plus d'éléments",d:"S"},{t:"Tu fais une analyse risque/bénéfice avec les données disponibles",d:"C"}]},
+  {text:"Tu reçois une critique sur ton travail. Ta réaction :",opts:[{t:"Tu la prends en compte si justifiée, sinon tu défends ta position",d:"D"},{t:"Tu es touché(e) mais tu rebondis vite en échangeant",d:"I"},{t:"Tu la gardes pour toi et y réfléchis longuement",d:"S"},{t:"Tu demandes des exemples précis pour comprendre et corriger",d:"C"}]},
+  {text:"Tu arrives dans une soirée où tu ne connais personne. Tu :",opts:[{t:"Tu te présentes directement aux personnes clés",d:"D"},{t:"Tu engages la conversation avec le premier groupe venu",d:"I"},{t:"Tu observes un moment puis rejoins quelqu'un qui semble accessible",d:"S"},{t:"Tu restes en retrait et attends qu'on vienne vers toi",d:"C"}]},
+  {text:"Un ami te raconte un problème. Tu as plutôt tendance à :",opts:[{t:"Lui proposer directement une solution concrète",d:"D"},{t:"Le rassurer et lui remonter le moral",d:"I"},{t:"L'écouter longuement et être présent(e)",d:"S"},{t:"L'aider à analyser la situation de façon rationnelle",d:"C"}]},
+  {text:"Dans un travail d'équipe, le rôle qui te convient le mieux :",opts:[{t:"Leader : fixer le cap et distribuer les rôles",d:"D"},{t:"Animateur : maintenir l'énergie et la cohésion",d:"I"},{t:"Facilitateur : s'assurer que tout le monde est entendu",d:"S"},{t:"Expert : garantir la qualité et la rigueur du livrable",d:"C"}]},
+  {text:"Tu dois convaincre un interlocuteur réticent. Ta stratégie :",opts:[{t:"Tu es direct(e), tu affirmes ta position avec assurance",d:"D"},{t:"Tu mises sur la relation, l'enthousiasme et la vision",d:"I"},{t:"Tu cherches à comprendre ses freins et rassurer",d:"S"},{t:"Tu présentes des preuves, des faits, des comparatifs",d:"C"}]},
+  {text:"Quand tu envoies un email important, tu :",opts:[{t:"Tu vas droit au but — 3 lignes max",d:"D"},{t:"Tu mets une touche personnelle et chaleureuse",d:"I"},{t:"Tu relis plusieurs fois pour être sûr(e) du ton",d:"S"},{t:"Tu structures avec des puces et des détails précis",d:"C"}]},
+  {text:"Un collègue fait du mauvais travail. Tu :",opts:[{t:"Tu lui dis franchement ce qui ne va pas",d:"D"},{t:"Tu lui en parles de façon positive en valorisant ce qui est bien",d:"I"},{t:"Tu hésites à lui dire, tu ne veux pas le blesser",d:"S"},{t:"Tu lui montres objectivement les écarts avec ce qui était attendu",d:"C"}]},
+  {text:"Ton bureau / espace de travail est plutôt :",opts:[{t:"Fonctionnel et dégagé — l'essentiel uniquement",d:"D"},{t:"Décoré, vivant, un joyeux bazar créatif",d:"I"},{t:"Organisé, confortable, avec des objets familiers",d:"S"},{t:"Rangé méticuleusement, chaque chose à sa place",d:"C"}]},
+  {text:"Face à une to-do list de 20 tâches, tu :",opts:[{t:"Tu attaques les plus impactantes en premier",d:"D"},{t:"Tu fais d'abord celles qui te motivent le plus",d:"I"},{t:"Tu les traites dans l'ordre, une par une, régulièrement",d:"S"},{t:"Tu les tries par priorité, deadline et dépendances",d:"C"}]},
+  {text:"Ton rapport au temps et aux deadlines :",opts:[{t:"Tu bosses sous pression et tu livres toujours à temps",d:"D"},{t:"Tu as tendance à sous-estimer le temps nécessaire",d:"I"},{t:"Tu préfères avoir de la marge et avancer progressivement",d:"S"},{t:"Tu planifies chaque étape pour ne rien laisser au hasard",d:"C"}]},
+  {text:"Quand tu apprends quelque chose de nouveau, tu préfères :",opts:[{t:"Tester directement, apprendre par l'action",d:"D"},{t:"Échanger avec d'autres, regarder des vidéos dynamiques",d:"I"},{t:"Suivre un tutoriel pas-à-pas, progresser à ton rythme",d:"S"},{t:"Lire la documentation complète avant de commencer",d:"C"}]},
+  {text:"Un imprévu casse ta journée planifiée. Tu :",opts:[{t:"Tu gères l'imprévu et réorganises sans état d'âme",d:"D"},{t:"Tu trouves ça stimulant, la routine t'ennuie de toute façon",d:"I"},{t:"Ça te stresse, tu as besoin de retrouver un cadre",d:"S"},{t:"Tu recalcules les impacts et réajustes le planning",d:"C"}]},
+  {text:"On te propose un nouveau poste dans un domaine inconnu. Tu :",opts:[{t:"Tu fonces — nouveau défi, nouvelle conquête",d:"D"},{t:"L'idée t'enthousiasme, tu en parles à tout le monde",d:"I"},{t:"Tu y réfléchis longuement, pesant sécurité et changement",d:"S"},{t:"Tu te renseignes en profondeur avant de répondre",d:"C"}]},
+  {text:"Ce qui te motive le plus au quotidien :",opts:[{t:"Obtenir des résultats concrets et visibles",d:"D"},{t:"Être entouré(e) et reconnu(e) pour ta contribution",d:"I"},{t:"Travailler dans un environnement harmonieux et stable",d:"S"},{t:"Produire un travail de qualité irréprochable",d:"C"}]},
+  {text:"Ta plus grande peur professionnelle :",opts:[{t:"Perdre le contrôle ou être dépendant(e) des autres",d:"D"},{t:"Être ignoré(e) ou rejeté(e) par le groupe",d:"I"},{t:"L'instabilité, le conflit, la perte de repères",d:"S"},{t:"Faire une erreur ou livrer quelque chose d'imparfait",d:"C"}]},
+  {text:"Quand tu es sous stress intense, tu as tendance à :",opts:[{t:"Devenir autoritaire et impatient(e)",d:"D"},{t:"Parler beaucoup, disperser ton énergie",d:"I"},{t:"Te replier, éviter le conflit, te résigner",d:"S"},{t:"Devenir ultra-critique, perfectionniste et distant(e)",d:"C"}]},
+  {text:"Le compliment qui te touche le plus :",opts:[{t:"« Tu es efficace, on peut compter sur toi pour avancer »",d:"D"},{t:"« Tu es génial(e), tout le monde t'adore »",d:"I"},{t:"« Tu es quelqu'un de fiable et de profondément humain »",d:"S"},{t:"« Ton travail est d'une rigueur exemplaire »",d:"C"}]},
+  {text:"Si tu devais résumer ta philosophie de travail en un mot :",opts:[{t:"Efficacité",d:"D"},{t:"Passion",d:"I"},{t:"Fiabilité",d:"S"},{t:"Excellence",d:"C"}]},
+  {text:"Le week-end idéal pour recharger les batteries :",opts:[{t:"Un défi sportif ou un projet perso ambitieux",d:"D"},{t:"Une fête, un festival ou un moment entre amis",d:"I"},{t:"Une journée tranquille en famille ou dans la nature",d:"S"},{t:"Un bon livre, un documentaire, ou du temps pour apprendre",d:"C"}]}
+];
+
+const profiles={
+  D:{name:"Dominance",color:"#E03E36",emoji:"🔴",
+    subtitle:"L'Initiateur — orienté action et résultats",
+    desc:"Direct, décisif et orienté résultats. Aime les défis, prendre les commandes et aller droit au but. N'a pas peur de bousculer le statu quo pour faire avancer les choses.",
+    forces:["Leadership naturel","Prise de décision rapide","Goût du challenge","Orientation résultats","Capacité à trancher sous pression"],
+    limites:["Peut paraître autoritaire ou brusque","Impatience face à la lenteur","Tendance à négliger les émotions d'autrui","Difficulté à déléguer vraiment"],
+    env:"Environnement compétitif, autonomie, défis renouvelés, peu de bureaucratie.",
+    comm:"Communication directe, concise, orientée solutions. Va droit au but.",
+    stress:"Sous stress : devient autoritaire, impatient, peut prendre des décisions trop hâtives.",
+    conseil:"Prends le temps d'écouter avant d'agir. Ton efficacité est un atout, mais les autres ont besoin de se sentir entendus."},
+  I:{name:"Influence",color:"#F5B731",emoji:"🟡",
+    subtitle:"Le Communicant — orienté relations et enthousiasme",
+    desc:"Sociable, enthousiaste et créatif. Inspire les autres par son énergie, adore échanger et convaincre. L'ambiance compte autant que le résultat.",
+    forces:["Communication naturelle","Enthousiasme contagieux","Créativité et innovation","Capacité à fédérer","Optimisme et résilience"],
+    limites:["Tendance à la dispersion","Peut manquer de suivi sur les détails","Sous-estime parfois les contraintes","Difficulté avec la routine et les process"],
+    env:"Environnement collaboratif, reconnaissance, variété des tâches, interactions sociales.",
+    comm:"Communication chaleureuse, narrative, illustrée d'exemples et d'anecdotes.",
+    stress:"Sous stress : parle beaucoup, se disperse, peut devenir désorganisé.",
+    conseil:"Canalise ton énergie créative. Structure tes idées et termine ce que tu commences — c'est là que tes projets prendront vie."},
+  S:{name:"Stabilité",color:"#3EAF6E",emoji:"🟢",
+    subtitle:"Le Médiateur — orienté harmonie et fiabilité",
+    desc:"Patient, fiable et à l'écoute. Recherche l'harmonie et la coopération. Les autres se sentent en confiance grâce à sa constance et sa bienveillance.",
+    forces:["Écoute active et empathie","Fiabilité remarquable","Sens de la coopération","Patience et persévérance","Stabilité émotionnelle"],
+    limites:["Difficulté à dire non","Évitement du conflit","Résistance au changement soudain","Peut se sacrifier pour les autres"],
+    env:"Environnement stable, prévisible, collaboratif, où les relations humaines sont valorisées.",
+    comm:"Communication posée, empathique, à l'écoute. Prend le temps de s'assurer que chacun est entendu.",
+    stress:"Sous stress : se replie, évite le conflit, peut se résigner ou accumuler du ressentiment.",
+    conseil:"Ose exprimer tes besoins et fixer tes limites. Ta bienveillance sera encore plus forte si elle inclut le respect de toi-même."},
+  C:{name:"Conformité",color:"#2D7DD2",emoji:"🔵",
+    subtitle:"L'Analyste — orienté qualité et précision",
+    desc:"Méthodique, rigoureux et analytique. Recherche la qualité et la précision. A besoin de comprendre en profondeur avant d'agir et fournit un travail d'une fiabilité exceptionnelle.",
+    forces:["Rigueur et précision","Esprit analytique","Sens du détail","Fiabilité du travail produit","Pensée systémique"],
+    limites:["Perfectionnisme pouvant devenir paralysant","Difficulté à décider sans toutes les données","Peut paraître distant ou froid","Tendance à la sur-analyse"],
+    env:"Environnement structuré, où la qualité prime, avec accès aux données et au temps de réflexion.",
+    comm:"Communication factuelle, structurée, appuyée sur des preuves et des données.",
+    stress:"Sous stress : devient ultra-critique, perfectionniste, peut se couper émotionnellement.",
+    conseil:"Accepte que 80 % bien fait vaut mieux que 100 % jamais livré. Ton exigence est un don — ne la laisse pas devenir un frein."}
+};
+
+/* ── STATE ── */
+let cur=0, answers=new Array(questions.length).fill(null), userName='';
+
+function startTest(){
+  userName=document.getElementById('userName').value.trim()||'Participant';
+  document.getElementById('screen-intro').classList.add('hidden');
+  document.getElementById('screen-quiz').classList.remove('hidden');
+  showQ(0);
+}
+function showQ(i){
+  cur=i;const q=questions[i];
+  document.getElementById('q-text').textContent=q.text;
+  document.getElementById('q-counter').textContent=`Question ${i+1} / ${questions.length}`;
+  const pct=Math.round(i/questions.length*100);
+  document.getElementById('q-pct').textContent=pct+' %';
+  document.getElementById('progress-fill').style.width=pct+'%';
+  const od=document.getElementById('q-options');od.innerHTML='';
+  const ix=[0,1,2,3].sort(()=>Math.random()-0.5);
+  ix.forEach(j=>{const o=q.opts[j];const b=document.createElement('button');b.className='option-btn';
+    if(answers[i]===o.d)b.classList.add('selected');b.textContent=o.t;
+    b.onclick=function(){answers[i]=o.d;document.querySelectorAll('.option-btn').forEach(x=>x.classList.remove('selected'));
+      this.classList.add('selected');document.getElementById('btn-next').disabled=false;};od.appendChild(b);});
+  document.getElementById('btn-prev').style.visibility=i===0?'hidden':'visible';
+  document.getElementById('btn-next').disabled=answers[i]===null;
+  document.getElementById('btn-next').textContent=i===questions.length-1?'Voir mes résultats':'Suivant →';
+}
+function prevQ(){if(cur>0)showQ(cur-1);}
+function nextQ(){if(answers[cur]===null)return;if(cur<questions.length-1)showQ(cur+1);else showResults();}
+
+/* ── RESULTS ── */
+let finalScores={},finalPcts={},domKey='',secKey='';
+
+function showResults(){
+  document.getElementById('screen-quiz').classList.add('hidden');
+  const res=document.getElementById('screen-results');res.classList.add('visible');
+  const sc={D:0,I:0,S:0,C:0};answers.forEach(a=>{if(a)sc[a]++;});
+  const tot=questions.length;const pc={};for(const k in sc)pc[k]=Math.round(sc[k]/tot*100);
+  finalScores=sc;finalPcts=pc;
+  const sorted=Object.entries(pc).sort((a,b)=>b[1]-a[1]);
+  domKey=sorted[0][0];secKey=sorted[1][0];
+
+  document.getElementById('result-name').textContent=`Profil de ${userName}`;
+  const badge=document.getElementById('dominant-badge');badge.style.background=profiles[domKey].color;
+  badge.textContent=`${profiles[domKey].emoji} ${profiles[domKey].name}`+
+    (sorted[1][1]>sorted[0][1]*0.6?` + ${profiles[secKey].emoji} ${profiles[secKey].name}`:'');
+
+  // Bars
+  const bd=document.getElementById('score-bars');bd.innerHTML='';
+  [{k:'D',l:'🔴 Dominance'},{k:'I',l:'🟡 Influence'},{k:'S',l:'🟢 Stabilité'},{k:'C',l:'🔵 Conformité'}].forEach(d=>{
+    const r=document.createElement('div');r.className='score-row';
+    r.innerHTML=`<span class="score-label">${d.l}</span><div class="score-track"><div class="score-fill" style="width:0%;background:${profiles[d.k].color}"></div></div><span class="score-pct" style="color:${profiles[d.k].color}">${pc[d.k]}%</span>`;
+    bd.appendChild(r);requestAnimationFrame(()=>{setTimeout(()=>{r.querySelector('.score-fill').style.width=pc[d.k]+'%';},100);});
+  });
+
+  drawRadar(pc);
+
+  // Detail cards
+  const dd=document.getElementById('profile-details');dd.innerHTML='';
+  [domKey,secKey].forEach((k,i)=>{const p=profiles[k];const c=document.createElement('div');c.className='detail-card';c.style.borderLeftColor=p.color;
+    c.innerHTML=`<h3>${p.emoji} ${p.name} ${i===0?'— Profil dominant':'— Profil secondaire'}</h3>
+    <div class="subtitle">${p.subtitle}</div><p>${p.desc}</p>
+    <p style="margin-top:10px;font-weight:600;">Forces :</p><ul>${p.forces.map(f=>`<li>${f}</li>`).join('')}</ul>
+    <p style="margin-top:10px;font-weight:600;">Points de vigilance :</p><ul>${p.limites.map(l=>`<li>${l}</li>`).join('')}</ul>
+    <p style="margin-top:8px;font-weight:600;">Environnement idéal :</p><p>${p.env}</p>
+    <p style="margin-top:8px;font-weight:600;">Style de communication :</p><p>${p.comm}</p>
+    <p style="margin-top:8px;font-weight:600;">Comportement sous stress :</p><p>${p.stress}</p>
+    <p style="margin-top:12px;font-style:italic;color:#6B7280;">💡 ${p.conseil}</p>`;dd.appendChild(c);});
+}
+
+/* ── RADAR ── */
+function drawRadar(pc){
+  const cv=document.getElementById('radar'),ctx=cv.getContext('2d'),dpr=window.devicePixelRatio||1;
+  cv.width=300*dpr;cv.height=300*dpr;ctx.scale(dpr,dpr);cv.style.width='300px';cv.style.height='300px';
+  const cx=150,cy=150,r=110;const dims=['D','I','S','C'];
+  const labels=['Dominance','Influence','Stabilité','Conformité'];
+  const colors=['#E03E36','#F5B731','#3EAF6E','#2D7DD2'];
+  ctx.strokeStyle='#D1D5DB';ctx.lineWidth=0.8;
+  [0.25,0.5,0.75,1].forEach(s=>{ctx.beginPath();for(let i=0;i<=4;i++){const a=Math.PI*2*(i%4)/4-Math.PI/2;
+    const x=cx+r*s*Math.cos(a),y=cy+r*s*Math.sin(a);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}ctx.closePath();ctx.stroke();});
+  for(let i=0;i<4;i++){const a=Math.PI*2*i/4-Math.PI/2;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a));ctx.stroke();}
+  ctx.beginPath();dims.forEach((d,i)=>{const v=pc[d]/100;const a=Math.PI*2*i/4-Math.PI/2;
+    const x=cx+r*v*Math.cos(a),y=cy+r*v*Math.sin(a);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+  ctx.closePath();ctx.fillStyle='rgba(45,125,210,0.18)';ctx.fill();ctx.strokeStyle='#2D7DD2';ctx.lineWidth=2.5;ctx.stroke();
+  dims.forEach((d,i)=>{const v=pc[d]/100;const a=Math.PI*2*i/4-Math.PI/2;
+    const x=cx+r*v*Math.cos(a),y=cy+r*v*Math.sin(a);ctx.beginPath();ctx.arc(x,y,5,0,Math.PI*2);ctx.fillStyle=colors[i];ctx.fill();
+    const lx=cx+(r+22)*Math.cos(a),ly=cy+(r+22)*Math.sin(a);ctx.font='600 12px DM Sans,system-ui';ctx.fillStyle=colors[i];ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(labels[i],lx,ly);ctx.font='700 13px DM Sans,system-ui';ctx.fillText(pc[d]+'%',lx,ly+15);});
+}
+
+/* ── EXPORT WORD ── */
+function exportWord(){
+  const now=new Date();
+  const dateStr=now.toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+
+  // Convert radar to base64
+  const radarImg=document.getElementById('radar').toDataURL('image/png');
+
+  const dp=profiles[domKey], sp=profiles[secKey];
+
+  const html=`
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+<head><meta charset="utf-8">
+<style>
+  @page{size:A4;margin:2cm 2.5cm;}
+  body{font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#1a1a1a;line-height:1.6;}
+  h1{font-size:22pt;color:#2D7DD2;border-bottom:3px solid #2D7DD2;padding-bottom:8px;margin-bottom:6px;}
+  h2{font-size:15pt;color:#1a1a1a;margin-top:22px;margin-bottom:6px;border-bottom:1px solid #ddd;padding-bottom:4px;}
+  h3{font-size:12pt;margin-top:14px;margin-bottom:4px;}
+  .meta{font-size:10pt;color:#666;margin-bottom:20px;}
+  table.scores{border-collapse:collapse;width:100%;margin:12px 0;}
+  table.scores td,table.scores th{border:1px solid #ccc;padding:8px 12px;font-size:10.5pt;}
+  table.scores th{background:#f0f4f8;font-weight:700;text-align:left;}
+  .bar-cell{width:50%;}
+  .bar{height:18px;border-radius:4px;display:inline-block;}
+  .profile-box{border:1px solid #ddd;border-left:4px solid #ccc;padding:14px 16px;margin:10px 0;page-break-inside:avoid;}
+  ul{margin:6px 0 6px 20px;}
+  li{margin-bottom:3px;}
+  .conseil{font-style:italic;color:#555;margin-top:8px;}
+  .sources{font-size:9.5pt;color:#555;margin-top:20px;border-top:1px solid #ddd;padding-top:10px;}
+  .sources p{margin:3px 0;}
+  .footer{font-size:8.5pt;color:#999;margin-top:30px;text-align:center;border-top:1px solid #eee;padding-top:8px;}
+  .radar-img{text-align:center;margin:16px 0;}
+  .radar-img img{width:280px;height:280px;}
+</style></head><body>
+
+<h1>Rapport de Profil DISC</h1>
+<p class="meta"><strong>Nom :</strong> ${userName} &nbsp;|&nbsp; <strong>Date :</strong> ${dateStr} &nbsp;|&nbsp; <strong>Questionnaire :</strong> 24 situations</p>
+
+<h2>1. Résultats globaux</h2>
+<p><strong>Profil dominant :</strong> <span style="color:${dp.color};">■</span> ${dp.emoji} ${dp.name} (${finalPcts[domKey]}%)<br>
+<strong>Profil secondaire :</strong> <span style="color:${sp.color};">■</span> ${sp.emoji} ${sp.name} (${finalPcts[secKey]}%)</p>
+
+<div class="radar-img"><img src="${radarImg}" alt="Graphe radar DISC"></div>
+
+<table class="scores">
+<tr><th>Dimension</th><th>Score</th><th class="bar-cell">Répartition</th></tr>
+<tr><td>🔴 Dominance (D)</td><td>${finalPcts.D}%</td><td><div class="bar" style="width:${finalPcts.D}%;background:#E03E36;">&nbsp;</div></td></tr>
+<tr><td>🟡 Influence (I)</td><td>${finalPcts.I}%</td><td><div class="bar" style="width:${finalPcts.I}%;background:#F5B731;">&nbsp;</div></td></tr>
+<tr><td>🟢 Stabilité (S)</td><td>${finalPcts.S}%</td><td><div class="bar" style="width:${finalPcts.S}%;background:#3EAF6E;">&nbsp;</div></td></tr>
+<tr><td>🔵 Conformité (C)</td><td>${finalPcts.C}%</td><td><div class="bar" style="width:${finalPcts.C}%;background:#2D7DD2;">&nbsp;</div></td></tr>
+</table>
+
+<h2>2. Profil dominant — ${dp.emoji} ${dp.name}</h2>
+<div class="profile-box" style="border-left-color:${dp.color};">
+<h3>${dp.subtitle}</h3>
+<p>${dp.desc}</p>
+<h3>Forces</h3><ul>${dp.forces.map(f=>'<li>'+f+'</li>').join('')}</ul>
+<h3>Points de vigilance</h3><ul>${dp.limites.map(l=>'<li>'+l+'</li>').join('')}</ul>
+<h3>Environnement idéal</h3><p>${dp.env}</p>
+<h3>Style de communication</h3><p>${dp.comm}</p>
+<h3>Comportement sous stress</h3><p>${dp.stress}</p>
+<p class="conseil">💡 ${dp.conseil}</p>
+</div>
+
+<h2>3. Profil secondaire — ${sp.emoji} ${sp.name}</h2>
+<div class="profile-box" style="border-left-color:${sp.color};">
+<h3>${sp.subtitle}</h3>
+<p>${sp.desc}</p>
+<h3>Forces</h3><ul>${sp.forces.map(f=>'<li>'+f+'</li>').join('')}</ul>
+<h3>Points de vigilance</h3><ul>${sp.limites.map(l=>'<li>'+l+'</li>').join('')}</ul>
+<h3>Environnement idéal</h3><p>${sp.env}</p>
+<h3>Style de communication</h3><p>${sp.comm}</p>
+<h3>Comportement sous stress</h3><p>${sp.stress}</p>
+<p class="conseil">💡 ${sp.conseil}</p>
+</div>
+
+<h2>4. Synthèse du profil ${dp.name}-${sp.name}</h2>
+<p>Le profil <strong>${dp.name}-${sp.name}</strong> combine ${dp.forces[0].toLowerCase()} et ${sp.forces[0].toLowerCase()}. Cette combinaison est un atout majeur en contexte professionnel : elle permet d'agir avec ${domKey==='D'||domKey==='I'?'détermination':'constance'} tout en gardant une sensibilité ${secKey==='S'||secKey==='I'?'relationnelle':'analytique'} précieuse.</p>
+<p><strong>Clé de développement :</strong> veiller à équilibrer les tendances sous stress des deux dimensions — ${dp.stress.toLowerCase().replace('sous stress : ','')} et ${sp.stress.toLowerCase().replace('sous stress : ','')}.</p>
+
+<h2>5. Grille de lecture : communiquer avec chaque profil</h2>
+<table class="scores">
+<tr><th>Profil</th><th>Pour bien communiquer avec lui</th><th>À éviter</th></tr>
+<tr><td style="color:#E03E36;font-weight:700;">🔴 D</td><td>Aller droit au but, proposer des solutions, être concis</td><td>Tourner autour du pot, submerger de détails</td></tr>
+<tr><td style="color:#F5B731;font-weight:700;">🟡 I</td><td>Être enthousiaste, valoriser, raconter une histoire</td><td>Être froid, uniquement factuel, couper la parole</td></tr>
+<tr><td style="color:#3EAF6E;font-weight:700;">🟢 S</td><td>Être patient, rassurant, donner du temps</td><td>Brusquer, imposer un changement brutal</td></tr>
+<tr><td style="color:#2D7DD2;font-weight:700;">🔵 C</td><td>Fournir des preuves, être structuré, respecter les process</td><td>Être vague, approximatif, pressant</td></tr>
+</table>
+
+<h2>6. Méthodologie et sources</h2>
+<div class="sources">
+<p><strong>Fondement théorique :</strong> le modèle DISC repose sur les travaux du psychologue <strong>William Moulton Marston</strong>, publiés dans son ouvrage fondateur <em>Emotions of Normal People</em> (1928). Marston a identifié quatre dimensions comportementales fondamentales qu'il a reliées à la perception de l'environnement (favorable ou hostile) et au positionnement de l'individu (actif ou passif).</p>
+
+<p><strong>Développement psychométrique :</strong> les premiers instruments d'évaluation basés sur le modèle de Marston ont été développés par <strong>Walter V. Clarke</strong> dans les années 1950 (Activity Vector Analysis). Le format moderne du questionnaire DISC a été formalisé par <strong>John G. Geier, Ph.D.</strong> (Université du Minnesota) dans les années 1970 avec la création du <em>Personal Profile System</em> (PPS), publié par Performax Systems International (devenu Inscape Publishing, aujourd'hui Wiley).</p>
+
+<p><strong>Validité scientifique :</strong> le DISC est un outil de <em>description comportementale</em>, pas un test de personnalité au sens clinique du terme. Il ne mesure ni l'intelligence, ni les aptitudes, ni la santé mentale. Sa fiabilité test-retest est documentée dans les manuels techniques des éditeurs certifiés (Wiley, Thomas International, TTI Success Insights). La recherche académique de référence inclut :</p>
+<ul>
+<li>Marston, W. M. (1928). <em>Emotions of Normal People</em>. London: Kegan Paul.</li>
+<li>Geier, J. G. (1979). <em>Personal Profile System</em>. Minneapolis: Performax Systems International.</li>
+<li>Scullard, M. & Baum, D. (2015). <em>Everything DiSC Manual</em>. Minneapolis: Wiley.</li>
+<li>Thomas, S. (2004). <em>Using DISC to develop leadership</em>. Thomas International Research.</li>
+<li>Bonnstetter, B. J. & Suiter, J. I. (2013). <em>The Universal Language DISC</em>. TTI Success Insights.</li>
+</ul>
+
+<p><strong>Limites :</strong> ce questionnaire est un outil d'auto-positionnement à visée pédagogique. Il ne se substitue pas à un profil DISC certifié administré par un praticien formé (Wiley Authorized Partner, Thomas International, TTI). Les résultats dépendent de l'honnêteté et de la conscience de soi du répondant. Pour un usage professionnel (recrutement, coaching, bilan de compétences), un questionnaire normatif validé psychométriquement est recommandé.</p>
+
+<p><strong>Construction de ce questionnaire :</strong> 24 mises en situation comportementales, 4 options par question (une par dimension D-I-S-C), options présentées en ordre aléatoire pour réduire les biais de position. Le scoring est proportionnel (nombre de réponses par dimension / total).</p>
+</div>
+
+<div class="footer">
+  <p>Rapport généré le ${dateStr} — Outil d'auto-évaluation DISC à visée pédagogique<br>
+  Ce document ne constitue pas un diagnostic psychologique.</p>
+</div>
+
+</body></html>`;
+
+  const filename=`Rapport_DISC_${userName.replace(/\s+/g,'_')}_${now.toISOString().slice(0,10)}.docx`;
+  const blob=new Blob(['\ufeff'+html],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+
+  (async()=>{
+    try{
+      
+      
+        
+      
+        // fallback navigateur classique
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement('a');a.href=url;a.download=filename;
+        document.body.appendChild(a);a.click();document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+    }catch(e){
+      if(e.code==='declined') return;
+      // fallback
+      const url=URL.createObjectURL(new Blob(['\ufeff'+html],{type:'application/msword'}));
+      const a=document.createElement('a');a.href=url;a.download=filename.replace('.docx','.doc');
+      document.body.appendChild(a);a.click();document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  })();
+}
+
+function resetTest(){
+  answers=new Array(questions.length).fill(null);cur=0;
+  document.getElementById('screen-results').classList.remove('visible');
+  document.getElementById('screen-intro').classList.remove('hidden');
+  document.getElementById('userName').value='';
+}
+</script>
+</body>
+</html>
