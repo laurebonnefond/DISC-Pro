@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dynamiques d'équipe — Moteur et carrosserie</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&display=swap');
+:root{--d:#E03E36;--i:#F5B731;--s:#3EAF6E;--c:#2D7DD2;--bg:#FAFAFA;--surface:#FFF;--text:#1A1A1A;--muted:#6B7280;--border:#E5E7EB;--radius:14px;}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#111114;--surface:#1C1C21;--text:#E8E8EC;--muted:#9CA3AF;--border:#2D2D35;}}
+:root[data-theme="dark"]{--bg:#111114;--surface:#1C1C21;--text:#E8E8EC;--muted:#9CA3AF;--border:#2D2D35;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;}
+.ctr{max-width:760px;margin:0 auto;padding:20px 16px 60px;}
+h1{font-size:1.6rem;font-weight:700;text-align:center;margin-bottom:4px;}
+.ps{text-align:center;color:var(--muted);font-size:0.92rem;margin-bottom:24px;}
+.ps a{color:var(--c);}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;}
+.card h2{font-size:1.05rem;font-weight:700;margin-bottom:12px;}
+.card h3{font-size:0.93rem;font-weight:700;margin:14px 0 5px;}
+.card p,.card li{font-size:0.88rem;}
+.card ul{margin:4px 0 0 20px;}
+.fl label,.lbl{display:block;font-size:0.8rem;font-weight:600;color:var(--muted);margin-bottom:4px;}
+.inp{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;background:transparent;color:var(--text);font-family:inherit;font-size:0.93rem;outline:none;}
+.inp:focus{border-color:var(--c);}
+.row{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;}
+.row>div{flex:1;min-width:150px;}
+.cps{display:flex;gap:6px;flex-wrap:wrap;}
+.cp{min-width:42px;height:40px;padding:0 10px;border-radius:10px;border:2px solid transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.82rem;opacity:0.45;color:#fff;transition:all 0.15s;user-select:none;}
+.cp.tg{background:var(--border);color:var(--text);opacity:0.75;}
+.cp:hover{opacity:0.8;}.cp.active{border-color:var(--text);opacity:1;transform:scale(1.06);}
+.cp.tg.active{background:var(--c);color:#fff;}
+.btn{padding:12px 22px;border:none;border-radius:10px;background:var(--c);color:#fff;font-family:inherit;font-size:0.92rem;font-weight:600;cursor:pointer;}
+.btn:disabled{opacity:0.3;cursor:not-allowed;}
+.btn-ghost{background:var(--surface);color:var(--text);border:1.5px solid var(--border);}
+.imp{display:flex;gap:8px;margin-top:6px;}
+.imp .inp{flex:1;}
+.msg{font-size:0.82rem;margin-top:6px;min-height:1.1em;}
+.pl{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;}
+.pc{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-size:0.84rem;font-weight:600;color:#fff;}
+.pc .rm{cursor:pointer;opacity:0.75;margin-left:2px;}
+.hint{text-align:center;color:var(--muted);font-size:0.88rem;padding:10px 0;font-style:italic;}
+.hidden{display:none!important;}
+.bar{display:flex;height:26px;border-radius:8px;overflow:hidden;margin:4px 0 10px;}
+.bar div{display:flex;align-items:center;justify-content:center;font-size:0.74rem;font-weight:700;color:#fff;white-space:nowrap;}
+.pg{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;}
+.mp{border:1px solid var(--border);border-radius:12px;padding:14px;border-left:4px solid;}
+.mp h4{font-size:0.95rem;}
+.mp .ms{font-size:0.8rem;color:var(--muted);margin-bottom:6px;}
+.mp p{font-size:0.84rem;}
+.box{border-radius:10px;padding:12px 14px;margin-top:10px;border:1px solid var(--border);}
+.box h4{font-size:0.86rem;margin-bottom:3px;}
+.box p,.box li{font-size:0.85rem;}
+.g{background:color-mix(in srgb,var(--s) 8%,transparent);border-color:color-mix(in srgb,var(--s) 30%,transparent);}
+.r{background:color-mix(in srgb,var(--d) 7%,transparent);border-color:color-mix(in srgb,var(--d) 28%,transparent);}
+.b{background:color-mix(in srgb,var(--c) 7%,transparent);border-color:color-mix(in srgb,var(--c) 28%,transparent);}
+.y{background:color-mix(in srgb,var(--i) 12%,transparent);border-color:color-mix(in srgb,var(--i) 40%,transparent);}
+.risk{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border);}
+.risk:last-child{border-bottom:none;}
+.lvl{flex-shrink:0;font-size:0.74rem;font-weight:700;padding:3px 10px;border-radius:12px;color:#fff;min-width:68px;text-align:center;}
+.pair{border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:16px;background:var(--surface);}
+.ph{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+.pb{padding:4px 10px;border-radius:14px;color:#fff;font-weight:700;font-size:0.82rem;}
+.sp{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0 14px;padding:12px;border:1px solid var(--border);border-radius:12px;}
+.si{text-align:center;}
+.si .sl{font-size:0.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em;}
+.si .sr{width:72px;height:72px;margin:4px auto;position:relative;}
+.si svg{transform:rotate(-90deg);}
+.si circle{fill:none;stroke-width:6;}
+.si .sv{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:700;}
+.si .vd{font-size:0.76rem;font-weight:700;}
+.diff{width:100%;border-collapse:collapse;margin-top:6px;}
+.diff td{border-top:1px solid var(--border);padding:7px 6px;font-size:0.84rem;vertical-align:top;}
+.diff td:first-child{font-weight:700;width:30%;}
+.q{font-style:italic;}
+.avg{text-align:center;font-size:1.1rem;font-weight:700;margin-top:14px;}
+.legal{font-size:0.8rem;color:var(--muted);}
+.es{text-align:center;margin-top:24px;}
+.st{font-size:0.82rem;color:var(--muted);margin-top:8px;}
+.cp{color:#fff;}
+.axes{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:0.82rem;color:var(--muted);margin:2px 0 10px;}
+.ex{background:color-mix(in srgb,var(--c) 6%,transparent);border-radius:8px;padding:8px 10px;margin:6px 0;font-size:0.86rem;}
+.tbl{overflow-x:auto;margin-top:6px;}.tbl table{width:100%;border-collapse:collapse;font-size:0.83rem;}
+.tbl th,.tbl td{border:1px solid var(--border);padding:7px;vertical-align:top;text-align:left;}
+.tbl th{background:color-mix(in srgb,var(--c) 8%,transparent);}
+.sec-h{font-size:1.05rem;font-weight:700;margin:6px 0 12px;}
+.small{font-size:0.8rem;color:var(--muted);}
+.pair h3{font-size:0.92rem;margin:12px 0 4px;}
+.cps .cp{min-width:auto;}
+.cmp{border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:10px;}
+.cmp>b{display:block;font-size:0.9rem;margin-bottom:6px;}
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+@media(max-width:640px){.cgrid{grid-template-columns:1fr;}}
+.cside{border-left:4px solid;padding:4px 0 4px 10px;}
+.cside p{font-size:0.85rem;margin-bottom:4px;line-height:1.5;}
+.clab{font-size:0.78rem;font-weight:700;margin-bottom:3px;}
+</style>
+</head>
+<body>
+<div class="ctr">
+<h1>Dynamiques d'équipe</h1>
+<p class="ps">Moteur · carrosserie (ascendant) · fonctionnement sous stress — <a href="test-disc.html">passer le test d'abord</a></p>
+
+<div class="card">
+  <h2>Ajouter une personne</h2>
+  <div class="fl"><label>Importer un code profil (issu du test)</label>
+    <div class="imp"><input class="inp" id="inCode" placeholder="Ex : Laure:J-V-In-Ro-B"><button class="btn btn-ghost" onclick="importCode()">Importer</button></div>
+    <div class="msg" id="impMsg"></div></div>
+  <p style="text-align:center;font-size:0.8rem;color:var(--muted);margin:8px 0;">— ou saisie manuelle —</p>
+  <div class="fl"><label>Prénom</label><input class="inp" id="inN" placeholder="Ex : Tatiana" maxlength="30"></div>
+  <div class="row"><div><span class="lbl">Moteur (couleur principale)</span><div class="cps" id="gM">
+    <div class="cp" data-v="R" style="background:var(--d)">🔴 Raisonnement</div><div class="cp" data-v="J" style="background:var(--i)">🟡 Idéal</div><div class="cp" data-v="V" style="background:var(--s)">🟢 Harmonie</div><div class="cp" data-v="B" style="background:var(--c)">🔵 Pragmatisme</div></div></div></div>
+  <div class="row"><div><span class="lbl">Carrosserie (ascendant)</span><div class="cps" id="gC">
+    <div class="cp" data-v="Pil" style="background:var(--d)">Pilotage · Externe + Carré</div><div class="cp" data-v="Av" style="background:var(--i)">Aventure · Externe + Rond</div><div class="cp" data-v="Ada" style="background:var(--s)">Adaptabilité · Interne + Rond</div><div class="cp" data-v="Pru" style="background:var(--c)">Prudence · Interne + Carré</div></div></div></div>
+  <div class="row"><div><span class="lbl">Couleur sous stress (réactionnelle)</span><div class="cps" id="gST">
+    <div class="cp tg active" data-v="auto">Opposée (par défaut)</div><div class="cp" data-v="R" style="background:var(--d)">Rouge</div><div class="cp" data-v="J" style="background:var(--i)">Jaune</div><div class="cp" data-v="V" style="background:var(--s)">Vert</div><div class="cp" data-v="B" style="background:var(--c)">Bleu</div></div>
+    <p style="font-size:0.75rem;color:var(--muted);margin-top:4px;">Si inconnue, le modèle applique la couleur opposée : Rouge ↔ Vert, Jaune ↔ Bleu.</p></div></div>
+  <div style="margin-top:14px;"><button class="btn" id="bAdd" onclick="addP()" disabled style="width:100%;">Ajouter</button></div>
+</div>
+
+<div class="pl" id="pL"></div>
+<div class="hint" id="hint">Ajoute au moins 2 personnes pour voir les dynamiques.</div>
+
+<div id="res" class="hidden">
+  <div id="oMap"></div>
+  <div id="oProf"></div>
+  <div id="oSyn"></div>
+  <div id="oPairs"></div>
+  <div class="card legal"><b>Cadre d'utilisation.</b> Outil de réflexion sur les préférences comportementales et les interactions professionnelles. Les scores de compatibilité sont des indicateurs pédagogiques construits à partir du modèle, pas des mesures scientifiques. Ils ne doivent servir ni au recrutement, ni à l'évaluation des personnes, ni à une décision d'aptitude. Le vécu réel d'une équipe dépend aussi de l'organisation du travail, de la charge, du management et du contexte.</div>
+  <div class="es"><button class="btn" onclick="doExport()">📄 Exporter le rapport Word (.docx)</button><div class="st" id="eSt"></div></div>
+</div>
+</div>
+<script>
+/* ═══════════ MODÈLE GLOBAL DE PROFIL COMPORTEMENTAL ═══════════
+   Moteur = Loupe/Satellite × Tête/Cœur (fonctions de Jung)
+   Carrosserie (ascendant) = Interne/Externe × Rond/Carré
+   Couleur de la carrosserie : correspondance avec les styles observables du DISC
+*/
+var ORDER=["R","J","V","B"];
+var MOT={
+ R:{n:"Raisonnement",cl:"Rouge",c:"#E03E36",e:"🔴",ls:"Sa",tc:"Te",
+  q:"« Comment cela fonctionne-t-il et comment puis-je le transformer ou l'améliorer ? »",
+  rech:"comprendre, conceptualiser, résoudre des problèmes complexes, relever des défis et transformer les systèmes",
+  court:"la logique et la transformation des systèmes",prio:"la cohérence logique et l'amélioration du système",
+  test:"« Est-ce logique ? Peut-on faire mieux ? »",
+  fonct:"aime comprendre comment les choses fonctionnent, cherche les liens logiques, apprécie les problèmes complexes et construit volontiers des modèles et des solutions ingénieuses",
+  forces:["Capacité d'analyse et de conceptualisation","Ingéniosité, vision des solutions","Goût du défi intellectuel","Capacité à transformer les systèmes"],
+  vig:["Peut intellectualiser au détriment du ressenti","Peut devenir sceptique ou contradicteur","Se désintéresse des tâches trop répétitives"],
+  besoin:"des problèmes stimulants, une autonomie intellectuelle et des interlocuteurs compétents",
+  comm:"Apportez un raisonnement solide, acceptez le débat d'idées et laissez-lui la possibilité de challenger et d'améliorer.",
+  env:"des missions complexes, des marges pour innover et une hiérarchie qui argumente ses décisions",
+  conflit:"défend sa position sur le terrain des arguments et peut sous-estimer la dimension émotionnelle du désaccord"},
+ J:{n:"Idéal",cl:"Jaune",c:"#F5B731",e:"🟡",ls:"Sa",tc:"Co",
+  q:"« Quel sens cela a-t-il et quelle possibilité nouvelle peut-on imaginer ? »",
+  rech:"le sens, l'authenticité, l'inspiration, l'harmonie avec soi-même, la vision et les possibilités nouvelles",
+  court:"le sens et l'idéal",prio:"le sens et la fidélité à ses valeurs",
+  test:"« Est-ce que ça a du sens ? »",
+  fonct:"cherche du sens à ce qu'il ou elle fait, aime inspirer et fédérer, recherche l'originalité, déborde d'idées et s'engage avec intensité et loyauté pour ce en quoi il ou elle croit",
+  forces:["Enthousiasme et capacité à inspirer","Foisonnement d'idées et originalité","Intensité et loyauté de l'engagement","Fidélité à ses valeurs"],
+  vig:["Peut rechercher fortement la reconnaissance","Supporte mal les environnements très contraints","Peut privilégier la vision au détriment des contraintes concrètes"],
+  besoin:"du sens, de la reconnaissance de sa contribution et un espace pour proposer",
+  comm:"Partagez le sens et la vision, valorisez sa contribution, laissez de la place à ses idées puis aidez-la à les ancrer dans le concret.",
+  env:"des projets porteurs de sens, de la liberté de proposer et une reconnaissance sincère",
+  conflit:"le vit intensément dès que ses valeurs sont en jeu : il ou elle défend une conviction plus qu'une position"},
+ V:{n:"Harmonie",cl:"Vert",c:"#3EAF6E",e:"🟢",ls:"Lo",tc:"Co",
+  q:"« Comment les personnes vont-elles vivre cette situation ? »",
+  rech:"l'harmonie, des relations de confiance, des valeurs partagées, la coopération et le bien-être des personnes",
+  court:"la qualité des relations et le bien-être des personnes",prio:"la relation et l'équilibre humain",
+  test:"« Est-ce que les personnes vont bien ? »",
+  fonct:"est attentif(ve) aux besoins des autres, cherche la confiance, valorise la coopération et veille à préserver l'équilibre humain du groupe",
+  forces:["Écoute et attention aux autres","Création de confiance","Sens de la coopération","Préservation de l'équilibre humain"],
+  vig:["Peut éviter certains conflits","Sensible aux tensions","Peut s'oublier au profit de l'harmonie"],
+  besoin:"un climat relationnel sécurisant, de la considération et de la coopération",
+  comm:"Prenez le temps de la relation, expliquez l'impact sur les personnes et sollicitez explicitement son avis dans un climat sécurisant.",
+  env:"une équipe soudée, des relations de confiance et un management respectueux",
+  conflit:"cherche d'abord à préserver la relation et peut céder ou différer pour éviter la rupture"},
+ B:{n:"Pragmatisme",cl:"Bleu",c:"#2D7DD2",e:"🔵",ls:"Lo",tc:"Te",
+  q:"« Concrètement, comment cela fonctionne-t-il et comment peut-on l'améliorer ? »",
+  rech:"le concret, la précision, l'efficacité, la maîtrise, la méthode, la technique et la qualité",
+  court:"l'efficacité concrète et la qualité",prio:"ce qui fonctionne concrètement et le travail bien fait",
+  test:"« Concrètement, est-ce que ça marche ? »",
+  fonct:"aime comprendre concrètement, analyse son environnement, cherche des solutions applicables, apprécie la rigueur et améliore ce qui existe",
+  forces:["Sens pratique et efficacité","Précision et rigueur","Maîtrise technique","Amélioration continue de l'existant"],
+  vig:["Peut rechercher trop de précision","Peut vérifier beaucoup et ralentir la décision","Inconfortable face à l'imprécision"],
+  besoin:"des consignes claires, des moyens adaptés et le respect de la qualité du travail",
+  comm:"Soyez concret(e) et précis(e) : des faits, des exemples et un mode opératoire clair.",
+  env:"des missions concrètes, des outils fiables et des exigences de qualité",
+  conflit:"revient aux faits et à ce qui fonctionne réellement, et peut paraître rigide sur les détails"}
+};
+var LSF={
+ Lo:{n:"Loupe",e:"🔍",or:"Détail → concret → présent",q:"« Quels sont les faits ? »",d:"recueille l'information par les faits, les détails et ce qui est observable",forces:["Réalisme","Précision","Sens de l'observation"],vig:"Peut perdre de vue la vision globale ou avoir besoin de beaucoup d'éléments concrets avant d'avancer"},
+ Sa:{n:"Satellite",e:"🛰️",or:"Vision globale → relations → possibilités → futur",q:"« Où cela peut-il nous conduire ? »",d:"recueille l'information en prenant de la hauteur, en faisant des liens et en imaginant les possibles",forces:["Vision globale","Créativité","Anticipation"],vig:"Peut négliger certains détails et avoir du mal à revenir rapidement au concret"},
+ Mx:{n:"Loupe et Satellite",e:"⚖️",or:"Détail et vision selon le contexte",q:"« Regardons les faits… et ce qu'ils annoncent. »",d:"alterne regard précis et prise de hauteur selon la situation",forces:["Souplesse de perception"],vig:"Peut hésiter entre le détail et la vision d'ensemble"}
+};
+var TCF={
+ Te:{n:"Tête",e:"🧠",q:"« Quelle est la décision la plus logique ? »",d:"décide principalement avec la logique, les faits, les critères et les conséquences",forces:["Objectivité","Cohérence des décisions"],vig:"Peut sous-estimer le ressenti et paraître froid(e) ou distant(e)"},
+ Co:{n:"Cœur",e:"❤️",q:"« Quelle décision est la plus juste humainement ? »",d:"décide principalement avec ses valeurs, son ressenti et les conséquences humaines",forces:["Empathie","Prise en compte du contexte humain"],vig:"Peut avoir plus de difficulté à prendre une décision impopulaire"},
+ Mx:{n:"Tête et Cœur",e:"⚖️",q:"« Qu'est-ce qui est logique… et humainement juste ? »",d:"combine logique et valeurs selon les situations",forces:["Équilibre entre raison et ressenti"],vig:"Peut être tiraillé(e) entre logique et ressenti"}
+};
+var IEF={
+ In:{n:"Interne",e:"🔋",d:"réfléchit avant de parler, prend du recul et se ressource au calme",besoin:"du calme, du temps et un espace personnel",phrase:"« Je vais réfléchir et revenir vers toi. »"},
+ Ex:{n:"Externe",e:"💬",d:"verbalise pour réfléchir, se ressource dans l'échange et l'interaction",besoin:"des échanges, de la stimulation et un environnement dynamique",phrase:"« Parlons-en, cela va m'aider à trouver la solution. »"}
+};
+var RCF={
+ Ro:{n:"Rond",e:"⭕",d:"garde plusieurs options ouvertes, s'adapte, improvise et apprécie la liberté",phrase:"« On pourra toujours adapter. »"},
+ Ca:{n:"Carré",e:"⬛",d:"aime savoir où l'on va, planifie, organise et cherche à conclure",phrase:"« Quel est le plan et comment allons-nous procéder ? »"}
+};
+var CAR={
+ Pil:{n:"Pilotage",col:"R",ie:"Ex",rc:"Ca",e:"🧭",tend:"dirige, organise, structure, prend des responsabilités et fait avancer",besoin:"« Il faut organiser et faire avancer les choses. »",
+  forces:["Leadership","Capacité à structurer et à décider"],risques:["Peut devenir directif(ve)","Supporte mal les lenteurs","Peut vouloir contrôler son environnement"],
+  adj:"affirmé(e), organisé(e) et moteur dans le groupe",comm:"Soyez clair(e) sur les objectifs et les responsabilités ; proposez plutôt qu'attendre.",
+  env:"des responsabilités, des objectifs clairs et la possibilité de faire avancer les choses",
+  reunion:"prend la parole, cadre l'ordre du jour et pousse vers une décision",rythme:"décide vite, en échangeant, et veut conclure"},
+ Av:{n:"Aventure",col:"J",ie:"Ex",rc:"Ro",e:"🧭",tend:"explore, expérimente, agit spontanément, aime la liberté et la variété",besoin:"« Essayons et voyons ce que cela donne. »",
+  forces:["Audace et dynamisme","Adaptation et expérimentation"],risques:["Dispersion","Impulsivité","Difficulté avec les contraintes et à garder une direction unique"],
+  adj:"spontané(e), dynamique et très visible",comm:"Laissez de la place à la spontanéité ; fixez seulement quelques jalons clairs.",
+  env:"de la variété, de la liberté d'action et des occasions d'expérimenter",
+  reunion:"intervient spontanément, rebondit sur les idées et ouvre de nouvelles pistes",rythme:"décide vite, en essayant, et accepte d'ajuster ensuite"},
+ Ada:{n:"Adaptabilité",col:"V",ie:"In",rc:"Ro",e:"🧭",tend:"observe, réfléchit, s'adapte, reste ouvert(e) et trouve sa propre manière de fonctionner",besoin:"« Je vais observer, réfléchir et trouver ma façon de faire. »",
+  forces:["Souplesse et tolérance","Observation et autonomie"],risques:["Peut fonctionner de façon très personnelle","Peut être difficile à cadrer","A besoin d'une grande autonomie"],
+  adj:"discret(ète), souple et observateur(trice)",comm:"Laissez-lui du temps et de l'autonomie ; fixez le résultat attendu plutôt que la méthode.",
+  env:"de l'autonomie, de la confiance et un cadre souple",
+  reunion:"écoute et observe, intervient peu, souvent avec une remarque juste au bon moment",rythme:"prend le temps d'observer, puis ajuste sa décision"},
+ Pru:{n:"Prudence",col:"B",ie:"In",rc:"Ca",e:"🧭",tend:"réfléchit, vérifie, approfondit, prépare et sécurise avant d'agir",besoin:"« Je veux comprendre et sécuriser avant d'agir. »",
+  forces:["Rigueur et anticipation","Fiabilité et préparation"],risques:["Prudence excessive","Difficulté avec les changements brusques","Besoin important d'informations avant de décider"],
+  adj:"réservé(e), posé(e) et méthodique",comm:"Envoyez les informations à l'avance, donnez un cadre précis et du temps pour analyser.",
+  env:"un cadre clair, de la prévisibilité et du temps de préparation",
+  reunion:"écoute, prend des notes et revient après la réunion avec une analyse construite",rythme:"décide après avoir réfléchi et sécurisé"}
+};
+var CAR_KEYS=["Pil","Av","Ada","Pru"];
+function carOf(ie,rc){return ie==="Ex"?(rc==="Ca"?"Pil":"Av"):(rc==="Ca"?"Pru":"Ada");}
+function carOfColor(c){for(var i=0;i<CAR_KEYS.length;i++)if(CAR[CAR_KEYS[i]].col===c)return CAR_KEYS[i];return"Pil";}
+var OPP={R:"V",V:"R",J:"B",B:"J"};
+var NAMES={
+ R:{Pil:"Stratège bâtisseur",Av:"Inventeur audacieux",Ada:"Penseur indépendant",Pru:"Architecte méthodique"},
+ J:{Pil:"Leader visionnaire",Av:"Inspirateur enthousiaste",Ada:"Idéaliste discret",Pru:"Gardien du sens"},
+ V:{Pil:"Fédérateur organisé",Av:"Médiateur chaleureux",Ada:"Soutien bienveillant",Pru:"Pilier attentionné"},
+ B:{Pil:"Organisateur efficace",Av:"Technicien débrouillard",Ada:"Expert autonome",Pru:"Analyste rigoureux"}
+};
+/* Fonctionnement réactionnel (stress aigu) */
+var REAC={
+ R:{inf:"durcir le ton et imposer sa logique",reac:"devient tranchant(e) et sceptique, impose sa logique et démonte les arguments des autres",aide:"Ne pas entrer dans la joute : reconnaître la pertinence du raisonnement, puis revenir à l'objectif commun à froid."},
+ J:{inf:"s'enflammer et s'éparpiller",reac:"s'enflamme, dramatise et défend son point de vue avec une intensité qui peut déborder",aide:"Écouter et reconnaître ce qui touche la personne, puis l'aider à revenir au concret et à une seule priorité."},
+ V:{inf:"se fermer et subir en silence",reac:"se ferme, se tait, cède pour apaiser puis subit en silence",aide:"Créer un espace sécurisant, poser des questions ouvertes, ne pas brusquer et vérifier l'accord réel."},
+ B:{inf:"se rigidifier et tout contrôler",reac:"se rigidifie, contrôle tout et critique chaque détail",aide:"Réduire l'incertitude : informations fiables, cadre clair et temps pour vérifier."}
+};
+/* ═══ SITUATIONS DE TRAVAIL : ce qui se joue à l'intérieur (moteur) / ce que l'entourage voit (carrosserie) ═══ */
+var SIT=[
+ {k:"reunion",n:"En réunion",ic:"👥"},
+ {k:"projet",n:"Face à un nouveau projet",ic:"🚀"},
+ {k:"urgence",n:"Dans l'urgence ou l'imprévu",ic:"⏱️"},
+ {k:"desaccord",n:"En désaccord avec un collègue",ic:"⚡"},
+ {k:"critique",n:"Quand on critique son travail",ic:"🗣️"},
+ {k:"changement",n:"Lors d'une réorganisation",ic:"🔄"},
+ {k:"collegue",n:"Quand un collègue va mal",ic:"🤝"},
+ {k:"routine",n:"Face à une tâche répétitive",ic:"🔁"},
+ {k:"manager",n:"Avec sa hiérarchie",ic:"🏢"}
+];
+var MSIT={
+ R:{reunion:"cherche la logique du sujet, repère les incohérences et propose une autre façon de poser le problème",
+  projet:"s'intéresse d'abord au système : comment ça marche, où est le défi, comment faire mieux que l'existant",
+  urgence:"est stimulé(e) par le problème et cherche la cause profonde, parfois au-delà de l'urgence immédiate",
+  desaccord:"veut avoir raison sur le fond : argumente, challenge et attend des arguments solides",
+  critique:"l'accepte si elle est argumentée ; une critique non fondée déclenche une contre-argumentation",
+  changement:"l'adopte s'il est logique et améliore le système, le conteste s'il paraît incohérent",
+  collegue:"veut l'aider en analysant le problème et en proposant une solution, parfois avant d'avoir écouté le ressenti",
+  routine:"décroche vite et cherche à l'automatiser ou à la réinventer",
+  manager:"respecte la compétence plus que le statut et attend des décisions justifiées"},
+ J:{reunion:"cherche le sens et les possibles, et s'enthousiasme pour une vision qui donne envie",
+  projet:"se demande d'abord quel sens il a et quelle possibilité nouvelle il ouvre ; s'engage pleinement s'il y croit",
+  urgence:"se mobilise avec intensité si l'enjeu a du sens et peut entraîner les autres dans l'élan",
+  desaccord:"le vit intensément quand ses valeurs sont touchées : défend une conviction plus qu'une position",
+  critique:"la ressent fortement, surtout si elle touche ce en quoi il ou elle croit ; a besoin qu'on reconnaisse aussi sa contribution",
+  changement:"l'accueille comme une occasion de faire autrement, à condition qu'il ait du sens",
+  collegue:"veut lui redonner de l'élan et de l'espoir, reste fidèle à ses côtés et l'aide à voir d'autres possibles",
+  routine:"perd son énergie si la tâche n'a pas de sens et a besoin de la relier à une finalité",
+  manager:"attend une vision, de la reconnaissance et de la cohérence entre les discours et les actes"},
+ V:{reunion:"est attentif(ve) au climat, à qui parle et qui se tait, et cherche à préserver l'équilibre du groupe",
+  projet:"se demande d'abord comment les personnes vont vivre ce projet et qui doit y être associé",
+  urgence:"veille à ce que personne ne soit laissé de côté et soutient concrètement l'équipe",
+  desaccord:"cherche d'abord à préserver la relation ; peut céder ou différer pour éviter la rupture",
+  critique:"la vit d'abord sur le plan relationnel : « est-ce que la confiance est remise en cause ? »",
+  changement:"s'inquiète de l'impact humain et a besoin d'être rassuré(e) sur la place de chacun",
+  collegue:"s'en aperçoit souvent avant les autres, veut écouter, rassurer et rester disponible dans la durée",
+  routine:"la vit bien si elle s'inscrit dans un collectif chaleureux et utile aux autres",
+  manager:"attend de la confiance, de la considération et un climat respectueux"},
+ B:{reunion:"veut des faits, un ordre du jour clair et des décisions applicables",
+  projet:"se demande concrètement comment ça va fonctionner, avec quels moyens et quels délais",
+  urgence:"cherche la solution concrète la plus efficace et sécurise ce qui peut l'être",
+  desaccord:"revient aux faits, aux données et à ce qui fonctionne réellement",
+  critique:"veut des exemples précis pour corriger ; une critique floue le ou la déstabilise",
+  changement:"l'accepte s'il est concret, documenté et améliore réellement le fonctionnement",
+  collegue:"veut l'aider de manière pratique : un coup de main, une solution, un outil",
+  routine:"la réalise avec soin et cherche à l'optimiser",
+  manager:"attend des consignes claires, des moyens adaptés et le respect de la qualité du travail"}
+};
+var CSIT={
+ Pil:{reunion:"prend la parole, cadre l'ordre du jour et pousse vers une décision",
+  projet:"propose rapidement un plan, répartit les rôles et fixe des échéances",
+  urgence:"prend les commandes et organise la réponse",
+  desaccord:"l'aborde de front et cherche à trancher",
+  critique:"y répond immédiatement et défend sa position avec assurance",
+  changement:"veut organiser la transition et en piloter les étapes",
+  collegue:"va vers lui ou elle et propose un plan d'action",
+  routine:"l'organise, la planifie ou la délègue",
+  manager:"se positionne en interlocuteur actif, propose et revendique des responsabilités"},
+ Av:{reunion:"intervient spontanément, rebondit sur les idées et ouvre de nouvelles pistes",
+  projet:"veut commencer vite et ajuster en route : « essayons et voyons »",
+  urgence:"réagit vite, improvise et entraîne les autres dans l'action",
+  desaccord:"en parle ouvertement et rapidement, parfois avec vivacité, puis passe à autre chose",
+  critique:"réagit à chaud et a besoin d'en parler pour la digérer",
+  changement:"s'y lance avec curiosité, parfois avant que tout soit clarifié",
+  collegue:"va spontanément vers lui ou elle, propose d'en parler, de changer d'air",
+  routine:"s'en lasse vite et cherche de la variété",
+  manager:"a besoin de liberté ; peut contester un cadre perçu comme trop rigide"},
+ Ada:{reunion:"écoute et observe, intervient peu, souvent avec une remarque juste au bon moment",
+  projet:"observe, réfléchit puis trouve sa propre façon de contribuer",
+  urgence:"s'ajuste calmement et sans bruit à ce qui est nécessaire",
+  desaccord:"prend du recul, réfléchit seul(e), puis cherche un ajustement plutôt qu'une confrontation",
+  critique:"l'intériorise, y repense seul(e) et ajuste sa manière de faire",
+  changement:"s'adapte, à condition de garder une marge d'autonomie",
+  collegue:"s'en aperçoit en observant et propose une aide discrète, sans s'imposer",
+  routine:"s'en accommode si elle peut l'organiser à sa façon",
+  manager:"a besoin d'autonomie et de confiance plutôt que d'un contrôle serré"},
+ Pru:{reunion:"écoute, prend des notes et revient après la réunion avec une analyse construite",
+  projet:"demande d'abord les informations, prépare et sécurise avant de s'engager",
+  urgence:"a besoin de quelques minutes pour comprendre et sécuriser avant d'agir",
+  desaccord:"prépare ses arguments, souvent par écrit, et évite l'affrontement improvisé",
+  critique:"la prend au sérieux, l'analyse en profondeur, parfois en la ruminant",
+  changement:"a besoin de savoir précisément comment, quand et pourquoi avant d'adhérer",
+  collegue:"l'aide de manière fiable et discrète, dans la durée",
+  routine:"la réalise de façon fiable et régulière",
+  manager:"attend un cadre clair, de la prévisibilité et des consignes précises"}
+};
+/* Malentendus : ce que X pense spontanément de Y */
+var QV={
+ R:{R:"Mon raisonnement est meilleur que le tien.",J:"Belle vision… mais où est la logique ?",V:"Pourquoi ménager tout le monde au lieu de régler le problème ?",B:"Pourquoi s'enfermer dans le détail au lieu de repenser le système ?"},
+ J:{R:"Pourquoi tout ramener à la logique ? Et le sens ?",J:"Deux idéaux… lequel suit-on ?",V:"Pourquoi ne pas oser davantage ?",B:"Pourquoi tout freiner avec des contraintes ?"},
+ V:{R:"Pourquoi être si tranchant ? Il y a des personnes derrière.",J:"Belle idée, mais as-tu pensé à l'équipe ?",V:"Qui va oser dire ce qui ne va pas ?",B:"Pourquoi parler procédure quand quelqu'un va mal ?"},
+ B:{R:"Encore une théorie… concrètement, on fait quoi ?",J:"Où sont les faits derrière cet enthousiasme ?",V:"On ne peut pas tout décider au ressenti.",B:"On vérifie encore une fois ?"}
+};
+var QIE={In:"Pourquoi parle-t-il avant d'avoir réfléchi ?",Ex:"Pourquoi ne dit-il rien ? Est-il d'accord ?"};
+var QRC={Ro:"Pourquoi tout ce cadre ?",Ca:"Pourquoi changer encore le plan ?"};
+function gk(a,b){return [a,b].sort().join("-");}
+/* ═══ INTERACTIONS ENTRE MOTEURS ═══ */
+var IXM={
+"R-R":{compat:70,compl:30,l:"Joute d'idées",
+ dyn:"Deux esprits de raisonnement : ils se stimulent intellectuellement et conçoivent des solutions ambitieuses, mais peuvent s'épuiser dans le débat pour savoir qui a le meilleur modèle.",
+ ex:"En réunion de projet, ils refont trois fois l'architecture de la solution en se challengeant. Le résultat est brillant, mais la réunion a doublé de durée et le reste de l'équipe a décroché.",
+ f:["Stimulation intellectuelle mutuelle","Solutions innovantes","Exigence de cohérence"],r:["Débats sans fin","Compétition sur qui a raison","Oubli du facteur humain"],
+ co:["Fixer un temps pour débattre, puis un temps pour décider","S'accorder sur les critères de choix avant le débat","Associer un profil Vert pour l'impact humain"],
+ sd:"Sous pression, chacun durcit sa logique : le débat devient un bras de fer.",cd:"Débattre des idées, jamais des personnes, et conclure par une décision écrite.",
+ wp:"Sur un problème complexe (refonte d'un processus, analyse d'un accident aux causes multiples), ils remontent aux causes profondes et proposent des solutions structurelles.",
+ wn:"Sur un sujet sans enjeu intellectuel, ils décrochent tous les deux ; sur un sujet clivant, ils s'enferment dans la contradiction."},
+"J-J":{compat:85,compl:28,l:"Élan partagé",
+ dyn:"Deux idéalistes : enthousiasme, vision commune, énergie contagieuse. Le risque : deux idéaux qui divergent, ou une vision partagée qui ne se concrétise jamais.",
+ ex:"Ils imaginent ensemble un projet de prévention ambitieux et très inspirant. Trois mois plus tard, il n'existe toujours ni planning ni budget.",
+ f:["Énergie et enthousiasme","Vision inspirante","Engagement fort"],r:["Manque d'ancrage concret","Concurrence entre idéaux","Besoin mutuel de reconnaissance"],
+ co:["Traduire chaque idée en prochaine action concrète","S'appuyer sur un profil Bleu pour le concret","Reconnaître explicitement la contribution de chacun"],
+ sd:"Sous pression, l'intensité monte des deux côtés : les échanges deviennent passionnels.",cd:"Partager la vision, puis se répartir clairement le concret.",
+ wp:"Pour lancer une démarche QVCT, une campagne de sensibilisation ou fédérer autour d'un projet, ils embarquent tout le monde.",
+ wn:"Si leurs valeurs divergent sur un point, le conflit peut devenir très intense et personnel."},
+"V-V":{compat:90,compl:30,l:"Havre de confiance",
+ dyn:"Climat chaleureux, écoute mutuelle, coopération naturelle. Le risque : éviter ensemble les sujets qui fâchent.",
+ ex:"Un collègue ne respecte pas les consignes de sécurité. Aucun des deux n'ose le lui dire pour ne pas abîmer la relation, et la situation s'installe.",
+ f:["Confiance mutuelle","Écoute exemplaire","Climat apaisé"],r:["Évitement des conflits","Difficulté à recadrer","Décisions impopulaires repoussées"],
+ co:["Se donner la permission de dire non","Fixer des échéances de décision","Accepter qu'un désaccord n'est pas une rupture"],
+ sd:"Sous pression, les deux se ferment : le problème grossit en silence.",cd:"Nommer les non-dits : « qu'est-ce qu'on n'ose pas se dire ? »",
+ wp:"Accompagnement d'un salarié en difficulté, accueil des nouveaux, médiation : ils créent un climat où chacun se sent en confiance.",
+ wn:"Les non-dits s'accumulent et les décisions difficiles sont repoussées indéfiniment."},
+"B-B":{compat:80,compl:28,l:"Atelier de précision",
+ dyn:"Rigueur, efficacité, qualité : deux profils pragmatiques produisent un travail fiable. Le risque : la sur-vérification et le manque de recul.",
+ ex:"Ils doivent mettre à jour une procédure. Ils vérifient chaque détail ensemble et livrent un document irréprochable… avec deux semaines de retard.",
+ f:["Fiabilité","Précision","Efficacité concrète"],r:["Sur-vérification","Manque de vision","Lenteur face à l'innovation"],
+ co:["Définir le niveau de qualité « suffisant »","Fixer une date de livraison ferme","S'appuyer sur un profil Rouge ou Jaune pour la vision"],
+ sd:"Sous pression, chacun contrôle davantage : rigidité à deux.",cd:"Se challenger sur le « suffisamment bien » plutôt que sur le parfait.",
+ wp:"Mise en conformité, procédures, maintenance, mesures techniques : livrables précis et applicables.",
+ wn:"Face à un projet flou ou innovant, ils bloquent tant que tout n'est pas défini ; le sens peut se perdre derrière la technique."},
+"J-R":{compat:72,compl:60,l:"Visionnaires complices",
+ dyn:"Tous deux prennent de la hauteur (Satellite) : le Rouge par la logique et la transformation des systèmes, le Jaune par le sens et l'inspiration.",
+ ex:"Le Jaune propose « et si on faisait du document unique un vrai projet d'équipe ? » ; le Rouge construit aussitôt la méthode pour y arriver. Mais si le Rouge démonte l'idée par la logique, le Jaune se sent nié dans ce qui compte pour lui.",
+ f:["Vision partagée de l'avenir","Créativité et innovation","Le Rouge structure les idées du Jaune"],r:["Le Rouge peut paraître froid et critique","Le Jaune peut paraître peu rigoureux","Personne ne gère les détails concrets"],
+ co:["Le Rouge challenge l'idée sans attaquer la conviction","Le Jaune accepte l'examen logique de sa vision","Confier le concret à un profil Bleu ou Vert"],
+ sd:"Sous stress, le Rouge devient tranchant et le Jaune s'enflamme : le débat d'idées devient un affrontement de valeurs.",cd:"Commencer par le pourquoi (Jaune), puis le comment logique (Rouge).",
+ wp:"Conception d'un nouveau dispositif, stratégie, innovation : la vision rencontre l'architecture.",
+ wn:"Quand le Rouge réduit une conviction à une question de logique, le Jaune décroche ou se braque."},
+"B-R":{compat:70,compl:62,l:"Ingénieurs du réel",
+ dyn:"Deux décideurs « Tête » : le Rouge pense système et transformation, le Bleu pense concret et applicable.",
+ ex:"Le Rouge propose de refondre tout le processus de traçabilité ; le Bleu demande « concrètement, avec quel outil, qui saisit, combien de temps ? ». Ensemble, ils obtiennent une solution ambitieuse ET réaliste.",
+ f:["Décisions rationnelles","Ambition + faisabilité","Respect mutuel de la compétence"],r:["Le Rouge trouve le Bleu terre-à-terre","Le Bleu trouve le Rouge théorique","Dimension humaine sous-estimée"],
+ co:["Valider ensemble le niveau d'ambition et de précision","Le Rouge accepte les contraintes du terrain","Penser explicitement à l'impact humain"],
+ sd:"Sous stress, débat logique contre contrôle : chacun campe sur ses arguments.",cd:"Parler faits et logique, et toujours conclure par un plan concret.",
+ wp:"Analyse d'accidents, ergonomie, organisation du travail : analyse profonde + solutions applicables.",
+ wn:"Les deux peuvent oublier le vécu des personnes et produire une solution juste mais mal acceptée."},
+"J-V":{compat:82,compl:60,l:"Cœurs alliés",
+ dyn:"Tous deux décident avec le cœur : le Jaune porte l'idéal et le sens, le Vert prend soin des relations et de l'équilibre humain.",
+ ex:"Face à un salarié en souffrance, le Vert l'écoute longuement et le rassure, le Jaune lui redonne une perspective et de l'élan. Mais quand une décision difficile s'impose, aucun des deux ne veut la porter.",
+ f:["Forte sensibilité humaine","Le Jaune donne l'élan, le Vert la stabilité","Climat chaleureux"],r:["Difficulté à trancher","Évitement des sujets durs","Le Jaune peut bousculer le besoin de calme du Vert"],
+ co:["Oser les désaccords","Nommer qui porte les décisions difficiles","Le Jaune respecte le rythme du Vert"],
+ sd:"Sous stress, le Jaune s'enflamme et le Vert se ferme : malaise silencieux.",cd:"Le Jaune vérifie que le Vert est réellement d'accord ; le Vert exprime ses besoins.",
+ wp:"Prévention des RPS, accompagnement du changement, accueil, formation : forte qualité relationnelle.",
+ wn:"Les décisions impopulaires traînent ; un conflit peut s'enkyster sous une apparente bonne entente."},
+"B-V":{compat:72,compl:62,l:"Terrain solide",
+ dyn:"Tous deux partent du concret et du présent (Loupe) : le Bleu par la méthode et la précision, le Vert par l'attention aux personnes.",
+ ex:"Pour l'aménagement d'un poste, le Bleu mesure les hauteurs et choisit le matériel ; le Vert vérifie que le salarié se sent écouté et à l'aise avec la solution.",
+ f:["Ancrage dans le réel","Fiabilité et soin","Méthode + attention humaine"],r:["Le Bleu peut paraître froid au Vert","Le Vert peut paraître trop subjectif au Bleu","Peu de vision d'ensemble"],
+ co:["Le Bleu explique l'impact humain de ses choix","Le Vert objective ses ressentis par des faits","S'appuyer sur un profil Rouge ou Jaune pour la vision"],
+ sd:"Sous stress, le Bleu contrôle et le Vert se tait : rigidité d'un côté, retrait de l'autre.",cd:"Faits + ressenti : « voilà ce qui est, voilà comment c'est vécu ».",
+ wp:"Aménagement de poste, suivi individuel, procédures humanisées : rigueur et bienveillance.",
+ wn:"Face à un changement de cap ou à un projet visionnaire, ils peuvent freiner ensemble."},
+"R-V":{compat:40,compl:88,l:"Tête et cœur",
+ dyn:"Les deux pôles opposés : le Rouge raisonne sur le système et l'avenir, le Vert prend soin des personnes ici et maintenant. Fort potentiel… et forte incompréhension.",
+ ex:"Le Rouge présente une réorganisation logique et brillante ; le Vert demande « et les personnes, elles vont le vivre comment ? ». Le Rouge y voit un frein, le Vert un manque de considération. Si le Rouge intègre la question du Vert, le projet devient à la fois intelligent et accepté.",
+ f:["Complémentarité maximale","Le Vert humanise les solutions du Rouge","Le Rouge aide le Vert à prendre du recul"],r:["Le Rouge juge le Vert trop sensible","Le Vert juge le Rouge froid et cassant","Malentendus fréquents"],
+ co:["Le Rouge pose systématiquement la question de l'impact humain","Le Vert accepte l'examen logique sans le vivre comme une attaque","Prévoir des temps d'échange en tête-à-tête"],
+ sd:"Couleurs opposées : sous stress, le Vert peut basculer en Rouge et le Rouge en Vert. Leurs réactions deviennent imprévisibles l'un pour l'autre.",cd:"Le Rouge commence par la relation avant l'argument ; le Vert exprime son désaccord avec des faits.",
+ wp:"Conduite du changement réussie : le Rouge conçoit, le Vert rend acceptable.",
+ wn:"Sans effort conscient, dialogue de sourds : l'un parle système, l'autre parle personnes."},
+"B-J":{compat:38,compl:88,l:"Idéal et réalité",
+ dyn:"L'autre axe opposé : le Jaune voit les possibles et le sens, le Bleu voit le concret, les contraintes et la qualité.",
+ ex:"Le Jaune s'enthousiasme pour une journée de prévention ludique avec un escape game ; le Bleu liste aussitôt les contraintes : budget, salle, sécurité, délais. Le Jaune se sent coupé dans son élan, le Bleu se sent incompris. Ensemble, ils peuvent pourtant produire un événement inspirant ET parfaitement organisé.",
+ f:["Le Bleu ancre les idées du Jaune","Le Jaune donne du sens au travail du Bleu","Vision + exécution"],r:["Le Jaune trouve le Bleu rabat-joie","Le Bleu trouve le Jaune irréaliste","Communication très différente"],
+ co:["Le Bleu commence par ce qui est faisable avant les contraintes","Le Jaune prépare quelques éléments concrets","Se répartir : le sens pour l'un, le plan pour l'autre"],
+ sd:"Couleurs opposées : sous stress, le Jaune peut se rigidifier en Bleu et le Bleu s'enflammer en Jaune, ce qui surprend l'autre.",cd:"Le Jaune présente l'idée avec trois points concrets ; le Bleu répond « oui, et pour que ça marche il faut… ».",
+ wp:"Projets innovants qui doivent aboutir : le Jaune inspire, le Bleu sécurise la réalisation.",
+ wn:"Le Jaune propose, le Bleu objecte ; le Jaune cesse de proposer, le Bleu travaille seul."}
+};
+/* ═══ INTERACTIONS ENTRE CARROSSERIES (rythme et structure) ═══ */
+var IXC={
+"Pil-Pil":{compat:72,compl:30,l:"Deux capitaines",tempo:"même rythme rapide et structuré, mais deux personnes qui veulent piloter",ex:"En réunion, chacun propose son plan et ses échéances : il faut décider qui tient le volant.",tip:"Répartir clairement le pilotage par sujet."},
+"Av-Av":{compat:85,compl:28,l:"Deux explorateurs",tempo:"rythme rapide, spontané, avec peu de cadre",ex:"Ils lancent trois initiatives dans la semaine… et personne ne tient le planning.",tip:"Désigner qui garde la trace et le cap."},
+"Ada-Ada":{compat:85,compl:30,l:"Deux autonomes",tempo:"rythme posé, chacun fonctionne à sa manière",ex:"Chacun avance de son côté sans se tenir au courant ; ils découvrent tard qu'ils ont fait le même travail.",tip:"Planifier des points de synchronisation courts."},
+"Pru-Pru":{compat:85,compl:28,l:"Deux prudents",tempo:"rythme posé et très structuré",ex:"Avant de lancer l'action, chacun demande des informations complémentaires : le démarrage prend du retard.",tip:"Fixer une date de décision et s'y tenir."},
+"Av-Pil":{compat:70,compl:58,l:"Moteurs externes",tempo:"même vitesse, mais l'un veut un plan (Pilotage), l'autre veut garder des options (Aventure)",ex:"Le Pilotage fixe le planning ; l'Aventure propose de tout changer le lendemain parce qu'une meilleure idée est apparue.",tip:"Fixer les jalons non négociables et laisser une zone d'improvisation."},
+"Ada-Pru":{compat:70,compl:58,l:"Réflexions parallèles",tempo:"même besoin de recul, mais l'un veut un cadre précis (Prudence), l'autre préfère s'ajuster (Adaptabilité)",ex:"La Prudence attend des consignes détaillées ; l'Adaptabilité trouve sa propre façon de faire et ne voit pas pourquoi tout écrire.",tip:"S'accorder par écrit sur l'essentiel et laisser libre le reste."},
+"Ada-Av":{compat:70,compl:58,l:"Souplesses complémentaires",tempo:"même goût pour la souplesse, mais l'un agit à voix haute (Aventure), l'autre en observant (Adaptabilité)",ex:"L'Aventure lance l'idée en réunion et attend une réaction immédiate ; l'Adaptabilité ne répond que le lendemain, après réflexion.",tip:"Laisser un temps de réflexion avant d'attendre une réponse."},
+"Pil-Pru":{compat:70,compl:58,l:"Organisateurs",tempo:"même goût pour la structure, mais l'un décide en parlant (Pilotage), l'autre après avoir réfléchi (Prudence)",ex:"Le Pilotage veut valider le plan en réunion ; la Prudence demande à l'étudier d'abord : « Je te réponds demain. »",tip:"Envoyer les éléments avant la réunion de décision."},
+"Ada-Pil":{compat:42,compl:82,l:"Cadre et liberté",tempo:"opposés sur les deux axes : l'un pilote à voix haute avec un plan, l'autre observe et s'ajuste à sa façon",ex:"Le Pilotage distribue les tâches avec des échéances précises ; l'Adaptabilité les réalise à sa manière et à son rythme. Le Pilotage croit à un manque d'implication, l'Adaptabilité se sent surveillée.",tip:"Le Pilotage fixe le résultat attendu plutôt que la méthode ; l'Adaptabilité informe régulièrement de son avancée."},
+"Av-Pru":{compat:42,compl:82,l:"Élan et sécurité",tempo:"opposés sur les deux axes : l'un fonce et improvise en échangeant, l'autre réfléchit et sécurise avant d'agir",ex:"L'Aventure propose de tester une nouvelle organisation dès lundi ; la Prudence demande une analyse des risques. L'un se sent freiné, l'autre bousculé.",tip:"Tester à petite échelle : l'Aventure obtient l'action, la Prudence obtient la sécurité."}
+};
+/* Scores de compatibilité : 60 % moteurs + 40 % carrosseries, bonus « pont » */
+function calcSc(a,b){
+  var m=IXM[gk(a.m,b.m)],c=IXC[gk(a.car,b.car)];
+  var cp=m.compat*0.6+c.compat*0.4,cl=m.compl*0.6+c.compl*0.4;
+  if(CAR[a.car].col===b.m||CAR[b.car].col===a.m)cp+=5;
+  cp=Math.round(Math.min(97,Math.max(12,cp)));cl=Math.round(Math.min(97,Math.max(12,cl)));
+  return{compat:cp,compl:cl,syn:Math.round(cp*0.45+cl*0.55)};
+}
+function vdt(v){if(v>=80)return{t:"Excellent",c:"#16a34a"};if(v>=65)return{t:"Bon",c:"#2D7DD2"};if(v>=50)return{t:"Correct",c:"#d97706"};if(v>=35)return{t:"Tendu",c:"#ea580c"};return{t:"Difficile",c:"#dc2626"};}
+function profLabel(m,car){return MOT[m].cl+" ascendant "+MOT[CAR[car].col].cl;}
+/* Profil « miroir » : celui avec lequel on risque le plus d'être confondu */
+function mirrorOf(m,car,m2){
+  var cc=CAR[car].col;
+  if(cc!==m)return{m:cc,car:carOfColor(m),why:"inverse"};
+  return{m:m2,car:car,why:"meme"};
+}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+function li(x){return"<li>"+x+"</li>";}
+function cap1(s){return s.charAt(0).toUpperCase()+s.slice(1);}
+
+/* ═══ GÉNÉRATEUR .DOCX NATIF (sans dépendance) ═══
+   Convertit le HTML du rapport (h1-h4, p, ul/li, table, b/i, couleurs) en vrai document Word,
+   puis l'empaquette dans une archive ZIP conforme à la norme Office Open XML. */
+var DOCX=(function(){
+  function x(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+  function hex(c){if(!c)return null;c=String(c).trim();var m=c.match(/^#([0-9a-f]{6})$/i);if(m)return m[1].toUpperCase();m=c.match(/^#([0-9a-f]{3})$/i);if(m)return(m[1][0]+m[1][0]+m[1][1]+m[1][1]+m[1][2]+m[1][2]).toUpperCase();return null;}
+  function styleColor(el,prop){var st=el.getAttribute&&el.getAttribute("style");if(!st)return null;var re=new RegExp("(?:^|;)\\s*"+prop+"\\s*:\\s*([^;]+)","i");var m=st.match(re);return m?hex(m[1]):null;}
+  var BG={g:"F0FDF4",r:"FEF2F2",b:"EFF6FF",y:"FFFBEB",ex:"F8FAFC"};
+  function bgOf(el){if(!el.className)return null;var cs=String(el.className).split(/\s+/);for(var i=0;i<cs.length;i++)if(BG[cs[i]])return BG[cs[i]];return null;}
+  function run(t,f){
+    if(!t)return"";var p="";
+    if(f.b)p+="<w:b/>";if(f.i)p+="<w:i/>";if(f.color)p+="<w:color w:val='"+f.color+"'/>";if(f.sz)p+="<w:sz w:val='"+f.sz+"'/><w:szCs w:val='"+f.sz+"'/>";
+    return"<w:r>"+(p?"<w:rPr>"+p+"</w:rPr>":"")+"<w:t xml:space='preserve'>"+x(t)+"</w:t></w:r>";
+  }
+  function inline(node,f){
+    var o="";
+    for(var i=0;i<node.childNodes.length;i++){
+      var n=node.childNodes[i];
+      if(n.nodeType===3){o+=run(n.nodeValue.replace(/\s+/g," "),f);continue;}
+      if(n.nodeType!==1)continue;
+      var t=n.tagName.toLowerCase(),g={b:f.b,i:f.i,color:f.color,sz:f.sz};
+      if(t==="br"){o+="<w:r><w:br/></w:r>";continue;}
+      if(t==="img"||t==="svg"||t==="canvas"||t==="script"||t==="style")continue;
+      if(t==="b"||t==="strong")g.b=true;
+      if(t==="i"||t==="em")g.i=true;
+      var c=styleColor(n,"color");if(c)g.color=c;
+      o+=inline(n,g);
+    }
+    return o;
+  }
+  function para(content,opt){
+    opt=opt||{};var pp="";
+    if(opt.style)pp+="<w:pStyle w:val='"+opt.style+"'/>";
+    if(opt.shd)pp+="<w:shd w:val='clear' w:color='auto' w:fill='"+opt.shd+"'/>";
+    if(opt.ind)pp+="<w:ind w:left='"+opt.ind+"' w:hanging='240'/>";
+    if(opt.center)pp+="<w:jc w:val='center'/>";
+    pp+="<w:spacing w:after='"+(opt.after!=null?opt.after:100)+"'/>";
+    return"<w:p><w:pPr>"+pp+"</w:pPr>"+content+"</w:p>";
+  }
+  function hasBlock(el){for(var i=0;i<el.children.length;i++){var t=el.children[i].tagName.toLowerCase();if(/^(p|div|ul|ol|table|h1|h2|h3|h4|section)$/.test(t))return true;}return false;}
+  function table(el){
+    var rows=el.querySelectorAll("tr"),o="<w:tbl><w:tblPr><w:tblW w:w='5000' w:type='pct'/><w:tblBorders>";
+    ["top","left","bottom","right","insideH","insideV"].forEach(function(s){o+="<w:"+s+" w:val='single' w:sz='4' w:space='0' w:color='BBBBBB'/>";});
+    o+="</w:tblBorders><w:tblCellMar><w:left w:w='80' w:type='dxa'/><w:right w:w='80' w:type='dxa'/></w:tblCellMar></w:tblPr>";
+    var maxc=1;for(var r=0;r<rows.length;r++)maxc=Math.max(maxc,rows[r].children.length);
+    o+="<w:tblGrid>";for(var k=0;k<maxc;k++)o+="<w:gridCol w:w='"+Math.floor(9000/maxc)+"'/>";o+="</w:tblGrid>";
+    for(var r2=0;r2<rows.length;r2++){
+      o+="<w:tr>";var cells=rows[r2].children;
+      for(var c=0;c<cells.length;c++){
+        var cell=cells[c],th=cell.tagName.toLowerCase()==="th",span=parseInt(cell.getAttribute("colspan")||"1",10);
+        o+="<w:tc><w:tcPr>"+(span>1?"<w:gridSpan w:val='"+span+"'/>":"")+(th?"<w:shd w:val='clear' w:color='auto' w:fill='EEF2F7'/>":"")+"</w:tcPr>";
+        var inner=hasBlock(cell)?blocks(cell,{b:th}):para(inline(cell,{b:th,color:styleColor(cell,"color")}),{after:40});
+        o+=(inner||para("",{after:0}))+"</w:tc>";
+      }
+      o+="</w:tr>";
+    }
+    return o+"</w:tbl>"+para("",{after:60});
+  }
+  function blocks(node,f,shd){
+    f=f||{};var o="",buf="";
+    function flush(){if(buf.replace(/<[^>]+>/g,"").trim()||buf.indexOf("<w:br/>")>=0){o+=para(buf,{shd:shd});}buf="";}
+    for(var i=0;i<node.childNodes.length;i++){
+      var n=node.childNodes[i];
+      if(n.nodeType===3){buf+=run(n.nodeValue.replace(/\s+/g," "),f);continue;}
+      if(n.nodeType!==1)continue;
+      var t=n.tagName.toLowerCase();
+      if(t==="script"||t==="style"||t==="img"||t==="svg"||t==="canvas")continue;
+      if(t==="h1"){flush();o+=para(inline(n,{b:true,color:"2D7DD2",sz:36}),{after:160});continue;}
+      if(t==="h2"){flush();o+=para(inline(n,{b:true,color:"1F2937",sz:28}),{style:"Heading2",after:120});continue;}
+      if(t==="h3"){flush();o+=para(inline(n,{b:true,sz:23}),{after:60});continue;}
+      if(t==="h4"){flush();o+=para(inline(n,{b:true,sz:21}),{shd:shd,after:40});continue;}
+      if(t==="p"){flush();var c=styleColor(n,"color");o+=para(inline(n,{b:f.b,i:f.i,color:c||f.color,sz:/small/.test(n.className||"")?18:null}),{shd:shd,center:/center/.test(n.getAttribute("style")||"")});continue;}
+      if(t==="ul"||t==="ol"){flush();var lis=n.children,k=0;for(var j=0;j<lis.length;j++){if(lis[j].tagName.toLowerCase()!=="li")continue;k++;o+=para(run(t==="ol"?k+". ":"• ",{})+inline(lis[j],f),{ind:360,shd:shd,after:40});}continue;}
+      if(t==="table"){flush();o+=table(n);continue;}
+      if(t==="div"||t==="section"){flush();o+=blocks(n,f,bgOf(n)||shd);continue;}
+      var g={b:f.b||t==="b"||t==="strong",i:f.i||t==="i"||t==="em",color:styleColor(n,"color")||f.color};
+      buf+=inline(n,g);
+    }
+    flush();return o;
+  }
+  /* ZIP (méthode « stored ») */
+  var CRC=(function(){var t=[];for(var n=0;n<256;n++){var c=n;for(var k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0;}return t;})();
+  function crc32(u){var c=0xFFFFFFFF;for(var i=0;i<u.length;i++)c=CRC[(c^u[i])&0xFF]^(c>>>8);return(c^0xFFFFFFFF)>>>0;}
+  function utf8(s){return new TextEncoder().encode(s);}
+  function zip(files){
+    var parts=[],central=[],off=0;
+    function u16(v){return[v&255,(v>>>8)&255];}function u32(v){return[v&255,(v>>>8)&255,(v>>>16)&255,(v>>>24)&255];}
+    files.forEach(function(f){
+      var name=utf8(f.name),data=utf8(f.data),crc=crc32(data);
+      var head=[].concat(u32(0x04034b50),u16(20),u16(0x0800),u16(0),u16(0),u16(0x21),u32(crc),u32(data.length),u32(data.length),u16(name.length),u16(0));
+      parts.push(new Uint8Array(head),name,data);
+      central.push({name:name,crc:crc,size:data.length,off:off});
+      off+=head.length+name.length+data.length;
+    });
+    var cstart=off,clen=0;
+    central.forEach(function(c){
+      var h=[].concat(u32(0x02014b50),u16(20),u16(20),u16(0x0800),u16(0),u16(0),u16(0x21),u32(c.crc),u32(c.size),u32(c.size),u16(c.name.length),u16(0),u16(0),u16(0),u16(0),u32(0),u32(c.off));
+      parts.push(new Uint8Array(h),c.name);clen+=h.length+c.name.length;
+    });
+    parts.push(new Uint8Array([].concat(u32(0x06054b50),u16(0),u16(0),u16(central.length),u16(central.length),u32(clen),u32(cstart),u16(0))));
+    return new Blob(parts,{type:"application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
+  }
+  function build(html,title){
+    var doc=new DOMParser().parseFromString(html,"text/html");
+    var body=blocks(doc.body,{});
+    var W="xmlns:w='http://schemas.openxmlformats.org/wordprocessingml/2006/main'";
+    var documentXml="<?xml version='1.0' encoding='UTF-8' standalone='yes'?><w:document "+W+"><w:body>"+body+
+      "<w:sectPr><w:pgSz w:w='11906' w:h='16838'/><w:pgMar w:top='1134' w:right='1134' w:bottom='1134' w:left='1247' w:header='708' w:footer='708' w:gutter='0'/></w:sectPr></w:body></w:document>";
+    var styles="<?xml version='1.0' encoding='UTF-8' standalone='yes'?><w:styles "+W+"><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii='Calibri' w:hAnsi='Calibri' w:cs='Calibri' w:eastAsia='Calibri'/><w:sz w:val='21'/><w:szCs w:val='21'/><w:lang w:val='fr-FR'/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after='100' w:line='264' w:lineRule='auto'/></w:pPr></w:pPrDefault></w:docDefaults>"+
+      "<w:style w:type='paragraph' w:default='1' w:styleId='Normal'><w:name w:val='Normal'/></w:style>"+
+      "<w:style w:type='paragraph' w:styleId='Heading2'><w:name w:val='heading 2'/><w:basedOn w:val='Normal'/><w:next w:val='Normal'/><w:pPr><w:keepNext/><w:spacing w:before='240'/><w:pBdr><w:bottom w:val='single' w:sz='4' w:space='2' w:color='DDDDDD'/></w:pBdr><w:outlineLvl w:val='1'/></w:pPr></w:style></w:styles>";
+    var files=[
+      {name:"[Content_Types].xml",data:"<?xml version='1.0' encoding='UTF-8' standalone='yes'?><Types xmlns='http://schemas.openxmlformats.org/package/2006/content-types'><Default Extension='rels' ContentType='application/vnd.openxmlformats-package.relationships+xml'/><Default Extension='xml' ContentType='application/xml'/><Override PartName='/word/document.xml' ContentType='application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml'/><Override PartName='/word/styles.xml' ContentType='application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml'/><Override PartName='/docProps/core.xml' ContentType='application/vnd.openxmlformats-package.core-properties+xml'/></Types>"},
+      {name:"_rels/.rels",data:"<?xml version='1.0' encoding='UTF-8' standalone='yes'?><Relationships xmlns='http://schemas.openxmlformats.org/package/2006/relationships'><Relationship Id='rId1' Type='http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument' Target='word/document.xml'/><Relationship Id='rId2' Type='http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties' Target='docProps/core.xml'/></Relationships>"},
+      {name:"docProps/core.xml",data:"<?xml version='1.0' encoding='UTF-8' standalone='yes'?><cp:coreProperties xmlns:cp='http://schemas.openxmlformats.org/package/2006/metadata/core-properties' xmlns:dc='http://purl.org/dc/elements/1.1/'><dc:title>"+x(title||"Rapport")+"</dc:title><dc:creator>DISC Pro</dc:creator></cp:coreProperties>"},
+      {name:"word/_rels/document.xml.rels",data:"<?xml version='1.0' encoding='UTF-8' standalone='yes'?><Relationships xmlns='http://schemas.openxmlformats.org/package/2006/relationships'><Relationship Id='rId1' Type='http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles' Target='styles.xml'/></Relationships>"},
+      {name:"word/styles.xml",data:styles},
+      {name:"word/document.xml",data:documentXml}
+    ];
+    return zip(files);
+  }
+  function download(html,filename,title,statusEl){
+    var blob=build(html,title);
+    var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=filename;a.style.display="none";
+    document.body.appendChild(a);a.click();
+    setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(a.href);},1500);
+    return blob;
+  }
+  return{build:build,download:download};
+})();
+
+function $(id){return document.getElementById(id);}
+var P=[],sel={gM:null,gC:null,gST:"auto"};
+["gM","gC","gST"].forEach(function(g){
+  document.querySelectorAll("#"+g+" .cp").forEach(function(el){
+    el.addEventListener("click",function(){
+      document.querySelectorAll("#"+g+" .cp").forEach(function(x){x.classList.remove("active");});
+      el.classList.add("active");sel[g]=el.getAttribute("data-v");ck();
+    });
+  });
+});
+$("inN").addEventListener("input",ck);
+function ck(){$("bAdd").disabled=!($("inN").value.trim()&&sel.gM&&sel.gC);}
+function resetForm(){$("inN").value="";sel={gM:null,gC:null,gST:"auto"};document.querySelectorAll(".cp").forEach(function(x){x.classList.toggle("active",x.getAttribute("data-v")==="auto");});ck();}
+function mk(name,m,car,st){return{name:name,m:m,car:car,st:st||OPP[m],stAuto:!st};}
+function addP(){
+  if(P.length>=8){$("impMsg").textContent="Maximum 8 personnes.";return;}
+  P.push(mk($("inN").value.trim(),sel.gM,sel.gC,sel.gST==="auto"?null:sel.gST));resetForm();refresh();
+}
+var OLD={D:"R",I:"J",S:"V",C:"B",R:"R",J:"J",V:"V",B:"B"};
+function parseCode(c){
+  var m=String(c).trim().match(/^(.+?)\s*:\s*([RJVBDISC])-([RJVBDISC])-(In|Ex|Mx)-(Ro|Ca|Mx)(?:-([RJVBDISC]))?$/i);
+  if(!m)return null;
+  function cap(x){return x.charAt(0).toUpperCase()+x.slice(1).toLowerCase();}
+  var mo=OLD[m[2].toUpperCase()],asc=OLD[m[3].toUpperCase()],ie=cap(m[4]),rc=cap(m[5]);
+  var car=(ie!=="Mx"&&rc!=="Mx")?carOf(ie,rc):carOfColor(asc);
+  return mk(m[1].trim(),mo,car,m[6]?OLD[m[6].toUpperCase()]:null);
+}
+function importCode(){
+  var x=parseCode($("inCode").value);
+  if(!x){$("impMsg").textContent="Code non reconnu. Format attendu : Prénom:J-V-In-Ro-B";return;}
+  if(P.length>=8){$("impMsg").textContent="Maximum 8 personnes.";return;}
+  P.push(x);$("inCode").value="";$("impMsg").textContent=x.name+" ajouté(e).";refresh();
+}
+function rmP(i){P.splice(i,1);refresh();}
+function lab(p){return profLabel(p.m,p.car);}
+function nm(p){return"<b>"+esc(p.name)+"</b>";}
+function chip(p){return"<span class='pb' style='background:linear-gradient(135deg,"+MOT[p.m].c+" 60%,"+MOT[CAR[p.car].col].c+")'>"+MOT[p.m].e+" "+esc(p.name)+" · "+lab(p)+" · ⚡"+MOT[p.st].cl+"</span>";}
+function refresh(){
+  $("pL").innerHTML=P.map(function(p,i){return"<span class='pc' style='background:linear-gradient(135deg,"+MOT[p.m].c+" 60%,"+MOT[CAR[p.car].col].c+")'>"+MOT[p.m].e+" "+esc(p.name)+" · "+lab(p)+" · "+CAR[p.car].n+" · ⚡"+MOT[p.st].cl+"<span class='rm' onclick='rmP("+i+")'>✕</span></span>";}).join("");
+  $("hint").style.display=P.length>=2?"none":"block";
+  if(P.length<2){$("res").classList.add("hidden");return;}
+  $("res").classList.remove("hidden");
+  $("oMap").innerHTML=mapHTML();$("oProf").innerHTML=profHTML();$("oSyn").innerHTML=synHTML();$("oPairs").innerHTML=pairsHTML();
+}
+function pairs(){var o=[];for(var i=0;i<P.length;i++)for(var j=i+1;j<P.length;j++)o.push({a:P[i],b:P[j],m:IXM[gk(P[i].m,P[j].m)],c:IXC[gk(P[i].car,P[j].car)],sc:calcSc(P[i],P[j])});return o;}
+function isMirror(a,b){return a.m!==b.m&&CAR[a.car].col===b.m&&CAR[b.car].col===a.m;}
+
+/* ═══ CARTOGRAPHIE ═══ */
+function stats(){
+  var n=P.length,s={n:n,m:{R:0,J:0,V:0,B:0},c:{Pil:0,Av:0,Ada:0,Pru:0},st:{R:0,J:0,V:0,B:0}};
+  P.forEach(function(p){s.m[p.m]++;s.c[p.car]++;s.st[p.st]++;});
+  s.sat=(s.m.R+s.m.J)/n;s.tete=(s.m.R+s.m.B)/n;s.ext=(s.c.Pil+s.c.Av)/n;s.car_=(s.c.Pil+s.c.Pru)/n;
+  return s;
+}
+function segBar(obj,keys,col,lbl){var t=0;keys.forEach(function(k){t+=obj[k];});var h="<div class='bar'>";keys.forEach(function(k){var v=Math.round(obj[k]/t*100);if(v>0)h+="<div style='width:"+v+"%;background:"+col(k)+"'>"+(v>=12?lbl(k)+" "+v+"%":"")+"</div>";});return h+"</div>";}
+function risks(s){
+  function sh(k){return s.m[k]/s.n;}function shc(k){return s.c[k]/s.n;}
+  var L=[
+   {k:"Pensée uniforme",v:(Math.max(s.m.R,s.m.J,s.m.V,s.m.B)+Math.max(s.c.Pil,s.c.Av,s.c.Ada,s.c.Pru))/(2*s.n),th:[0.8,0.6],hi:"Moteurs et carrosseries se ressemblent : l'équipe risque de partager les mêmes angles morts.",lo:"La diversité des profils protège l'équipe contre les biais collectifs.",con:"Inviter un regard extérieur et désigner un « avocat du diable » sur les décisions importantes."},
+   {k:"Manque de décision",v:1-(0.4*s.tete+0.35*s.car_+0.25*s.ext),th:[0.6,0.45],hi:"Peu de décideurs « Tête », peu de carrosseries carrées ou externes : les décisions risquent de traîner.",lo:"L'équipe dispose de ressorts suffisants pour trancher.",con:"Fixer des échéances de décision et désigner qui décide sur chaque sujet."},
+   {k:"Suranalyse",v:0.45*sh("B")+0.35*shc("Pru")+0.2*(1-s.ext),th:[0.5,0.35],hi:"Forte présence Bleue et Prudence : vérifications multiples, livrables retardés.",lo:"Le besoin d'analyse est équilibré.",con:"Définir le niveau de qualité « suffisant » et des points de livraison intermédiaires."},
+   {k:"Dispersion",v:0.45*sh("J")+0.35*shc("Av")+0.2*(1-s.car_),th:[0.5,0.35],hi:"Forte présence Jaune et Aventure : beaucoup d'idées, peu de suivi.",lo:"L'équipe garde un bon niveau de focalisation.",con:"Terminer chaque réunion par un relevé de décisions écrit : qui, quoi, quand."},
+   {k:"Résistance au changement",v:0.35*sh("V")+0.35*shc("Pru")+0.3*s.car_,th:[0.5,0.35],hi:"Forte présence Verte et Prudence : les changements brutaux risquent d'être mal vécus.",lo:"L'équipe semble capable d'absorber le changement.",con:"Annoncer tôt, expliquer le pourquoi, avancer par étapes et associer l'équipe."},
+   {k:"Manque de vision",v:1-s.sat,th:[0.75,0.55],hi:"Peu de profils « Satellite » (Rouge, Jaune) : l'équipe peut manquer de recul et d'anticipation.",lo:"L'équipe dispose de profils capables de prendre de la hauteur.",con:"Prévoir régulièrement un temps « et demain ? » pour anticiper."},
+   {k:"Facteur humain sous-estimé",v:s.tete,th:[0.75,0.55],hi:"Majorité de décideurs « Tête » (Rouge, Bleu) : l'impact humain des décisions peut être négligé.",lo:"Le ressenti des personnes est pris en compte.",con:"Poser systématiquement la question : « comment les personnes vont-elles vivre cette décision ? »"}
+  ];
+  L.forEach(function(r){r.lvl=r.v>=r.th[0]?"Élevé":(r.v>=r.th[1]?"Modéré":"Faible");r.col=r.lvl==="Élevé"?"#dc2626":(r.lvl==="Modéré"?"#d97706":"#16a34a");});
+  return L;
+}
+function mapHTML(){
+  var s=stats(),h="<div class='card'><h2>🗺️ Cartographie de l'équipe ("+s.n+" personnes)</h2>";
+  h+="<span class='lbl'>Moteurs</span>"+segBar(s.m,ORDER,function(k){return MOT[k].c;},function(k){return MOT[k].cl;});
+  h+="<span class='lbl'>Carrosseries</span>"+segBar(s.c,CAR_KEYS,function(k){return MOT[CAR[k].col].c;},function(k){return CAR[k].n;});
+  h+="<span class='lbl'>Sous stress (réactionnel)</span>"+segBar(s.st,ORDER,function(k){return MOT[k].c;},function(k){return"⚡ "+MOT[k].cl;});
+  var sat=Math.round(s.sat*100),te=Math.round(s.tete*100),ex=Math.round(s.ext*100),ca=Math.round(s.car_*100);
+  h+="<div class='axes'><span>🔍 Loupe "+(100-sat)+"% · 🛰️ Satellite "+sat+"%</span><span>🧠 Tête "+te+"% · ❤️ Cœur "+(100-te)+"%</span><span>🔋 Interne "+(100-ex)+"% · 💬 Externe "+ex+"%</span><span>⭕ Rond "+(100-ca)+"% · ⬛ Carré "+ca+"%</span></div>";
+  var miss=ORDER.filter(function(k){return s.m[k]===0;});
+  if(miss.length)h+="<p>⚠️ <b>Moteur absent :</b> "+miss.map(function(k){var v=P.filter(function(p){return CAR[p.car].col===k;}).map(function(p){return esc(p.name);});return MOT[k].e+" "+MOT[k].cl+" ("+MOT[k].n+")"+(v.length?", dont la couleur apparaît dans la carrosserie de "+v.join(", "):"");}).join(" · ")+"</p>";
+  else h+="<p>✅ Les quatre moteurs sont représentés.</p>";
+  var stDom=ORDER.slice().sort(function(x,y){return s.st[y]-s.st[x];})[0];
+  if(s.st[stDom]/s.n>=0.5)h+="<p>⚡ <b>Sous pression, l'équipe bascule majoritairement vers le "+MOT[stDom].cl+"</b> : le collectif risque de "+REAC[stDom].inf+". À anticiper dans les périodes de forte charge.</p>";
+  h+="<h3>Niveaux de risque collectif</h3>";
+  risks(s).forEach(function(r){h+="<div class='risk'><span class='lvl' style='background:"+r.col+"'>"+r.lvl+"</span><div><p><b>"+r.k+"</b> — "+(r.lvl==="Faible"?r.lo:r.hi)+"</p>"+(r.lvl!=="Faible"?"<p style='color:var(--muted)'>👉 "+r.con+"</p>":"")+"</div></div>";});
+  return h+"</div>";
+}
+
+/* ═══ FICHES ═══ */
+function profHTML(){
+  var h="<div class='card'><h2>👤 Fiches individuelles</h2><div class='pg'>";
+  P.forEach(function(p){var M=MOT[p.m],C=CAR[p.car];
+    h+="<div class='mp' style='border-left-color:"+M.c+"'><h4>"+M.e+" "+esc(p.name)+" — « "+NAMES[p.m][p.car]+" »</h4><div class='ms'>"+lab(p)+" · moteur "+M.n+" · carrosserie "+C.n+" · sous stress "+MOT[p.st].cl+(p.stAuto?" (attendu)":"")+"</div>";
+    h+="<p><b>Ce qui le ou la fait avancer :</b> "+M.court+". "+M.q+"</p>";
+    h+="<p><b>Ce que l'on voit :</b> quelqu'un de "+C.adj+", qui "+C.tend+".</p>";
+    if(CAR[p.car].col!==p.m)h+="<p><b>Attention :</b> sa carrosserie "+MOT[C.col].cl+" peut faire croire à un moteur "+MOT[C.col].cl+" ; son vrai moteur est "+M.cl+".</p>";
+    h+="<p><b>Sous stress :</b> il ou elle "+REAC[p.st].reac+". <i>Aider :</i> "+REAC[p.st].aide+"</p>";
+    h+="<p><b>Pour bien travailler avec lui ou elle :</b> "+M.comm+" "+C.comm+"</p></div>";
+  });
+  return h+"</div></div>";
+}
+
+/* ═══ SYNTHÈSE ═══ */
+function synHTML(){
+  var s=stats(),pr=pairs().sort(function(x,y){return y.sc.syn-x.sc.syn;}),best=pr[0],worst=pr[pr.length-1];
+  var avg=Math.round(pr.reduce(function(t,x){return t+x.sc.syn;},0)/pr.length);
+  var h="<div class='card'><h2>📑 Synthèse d'expert</h2><h3>1. Lecture globale</h3><p>"+globalText(s,best)+"</p>";
+  h+="<h3>2. Forces collectives</h3><ul>";
+  ORDER.forEach(function(k){if(s.m[k])h+=li(MOT[k].e+" <b>Moteur "+MOT[k].cl+"</b> ("+s.m[k]+") : "+MOT[k].forces.slice(0,2).join(", ").toLowerCase());});
+  CAR_KEYS.forEach(function(k){if(s.c[k])h+=li("🧭 <b>Carrosserie "+CAR[k].n+"</b> ("+s.c[k]+") : "+CAR[k].forces.join(", ").toLowerCase());});
+  h+="</ul>";
+  var comp=pr.filter(function(x){return x.sc.compl>=72;}),tens=pr.filter(function(x){return x.sc.compat<50;});
+  h+="<h3>3. Zones de complémentarité</h3>"+(comp.length?"<ul>"+comp.map(function(x){return li(nm(x.a)+" ⟷ "+nm(x.b)+" ("+x.sc.compl+" %) : "+x.m.f[0].toLowerCase()+". "+x.m.wp);}).join("")+"</ul>":"<p>Aucun binôme ne dépasse 72 % de complémentarité : les profils couvrent des registres proches.</p>");
+  h+="<h3>4. Zones de tension</h3>"+(tens.length?"<ul>"+tens.map(function(x){return li(nm(x.a)+" ⟷ "+nm(x.b)+" (compatibilité "+x.sc.compat+" %) : "+x.m.r[0].toLowerCase()+". "+x.m.wn);}).join("")+"</ul>":"<p>Aucun binôme sous 50 % de compatibilité : pas de zone de friction majeure attendue.</p>");
+  h+="<h3>5. Meilleure synergie</h3><div class='box g'><p>"+nm(best.a)+" ("+lab(best.a)+") ⟷ "+nm(best.b)+" ("+lab(best.b)+") — <b>"+best.sc.syn+" %</b> (compatibilité "+best.sc.compat+" %, complémentarité "+best.sc.compl+" %). ";
+  h+=(best.sc.compat>=65&&best.sc.compl>=65?"Ils se comprennent facilement tout en couvrant leurs angles morts respectifs, ce qui est rare. ":best.sc.compl>=65?"Ce que l'un ne voit pas, l'autre le couvre. ":"La communication circule naturellement entre eux. ");
+  h+="Concrètement : "+best.m.wp+"</p></div>";
+  var nn=6;
+  if(pr.length>1){h+="<h3>6. Binôme le plus exigeant</h3><div class='box r'><p>"+nm(worst.a)+" ("+lab(worst.a)+") ⟷ "+nm(worst.b)+" ("+lab(worst.b)+") — <b>"+worst.sc.syn+" %</b>. "+(worst.sc.compat<50?"Leurs registres divergent : sans effort conscient, les malentendus s'accumulent. ":"La relation est fonctionnelle mais demande de l'attention. ")+(worst.sc.compl>=65?"Leur complémentarité réelle ("+worst.sc.compl+" %) en fait pourtant un binôme à fort potentiel. ":"")+"Exemple typique : "+worst.m.ex+"</p></div>";nn=7;}
+  var mir=[],ponts=[];
+  pr.forEach(function(x){if(isMirror(x.a,x.b))mir.push(x);});
+  P.forEach(function(a){P.forEach(function(b){if(a!==b&&CAR[a.car].col===b.m&&a.m!==b.m&&!isMirror(a,b))ponts.push(nm(a)+" a une carrosserie "+MOT[b.m].cl+", la couleur du moteur de "+nm(b)+" : sa manière d'agir parle spontanément à "+esc(b.name)+", ce qui en fait un pont naturel.");});});
+  if(mir.length){h+="<h3>"+nn+". Profils miroirs</h3>";nn++;mir.forEach(function(x){h+="<div class='box y'><p>"+nm(x.a)+" ("+lab(x.a)+") et "+nm(x.b)+" ("+lab(x.b)+") ont les mêmes couleurs, inversées : le moteur de l'un est la carrosserie de l'autre. Ils se reconnaissent l'un dans l'autre… mais n'agissent pas pour les mêmes raisons. Face à un dilemme, "+esc(x.a.name)+" privilégiera "+MOT[x.a.m].prio+", "+esc(x.b.name)+" privilégiera "+MOT[x.b.m].prio+". C'est souvent là que naît la surprise : « je croyais qu'on pensait pareil ».</p></div>";});}
+  if(ponts.length){h+="<h3>"+nn+". Ponts naturels</h3><ul>"+ponts.map(li).join("")+"</ul>";nn++;}
+  var frag=pr.slice().sort(function(x,y){return IXM[gk(x.a.st,x.b.st)].compat-IXM[gk(y.a.st,y.b.st)].compat;})[0];
+  h+="<h3>"+nn+". Sous stress</h3><p>Sous pression, chacun peut basculer vers un fonctionnement qui n'est pas son moteur : "+P.map(function(p){return nm(p)+" "+MOT[p.m].cl+" → "+MOT[p.st].cl;}).join(", ")+". Binôme le plus fragile en crise : "+nm(frag.a)+" ⟷ "+nm(frag.b)+" ("+MOT[frag.a.st].cl+" ⟷ "+MOT[frag.b.st].cl+" sous stress) : "+IXM[gk(frag.a.st,frag.b.st)].sd+"</p>";
+  if(P.some(function(p){return p.stAuto;}))h+="<p class='small'>Pour les personnes dont la couleur sous stress n'a pas été mesurée, le modèle applique la couleur opposée.</p>";
+  h+="<h3>Clé de fonctionnement</h3><div class='box b'><p><b>Règle d'or :</b> regarder POURQUOI chacun agit (moteur) avant de juger COMMENT il agit (carrosserie), puis communiquer dans le style de l'autre.</p><ul>";
+  P.forEach(function(p){h+=li("Avec "+nm(p)+" : "+MOT[p.m].comm+" "+CAR[p.car].comm);});
+  h+="</ul></div><p class='avg'>Synergie moyenne de l'équipe : <span style='color:"+vdt(avg).c+"'>"+avg+" % — "+vdt(avg).t+"</span></p></div>";
+  return h;
+}
+function globalText(s,best){
+  if(s.n===2){
+    var a=P[0],b=P[1],t=nm(a)+" ("+lab(a)+", « "+NAMES[a.m][a.car]+" ») et "+nm(b)+" ("+lab(b)+", « "+NAMES[b.m][b.car]+" »). ";
+    if(a.m===b.m)t+="Ils partagent le même moteur "+MOT[a.m].cl+" : ils sont mus par la même chose ("+MOT[a.m].court+"), ce qui facilite la compréhension mais peut amplifier les mêmes biais. ";
+    else if(OPP[a.m]===b.m)t+="Leurs moteurs sont opposés ("+MOT[a.m].cl+" ↔ "+MOT[b.m].cl+") : ils ne perçoivent ni ne décident de la même façon. Potentiel maximal de complémentarité, risque maximal d'incompréhension. ";
+    else t+="Leurs moteurs partagent une dimension ("+(MOT[a.m].ls===MOT[b.m].ls?LSF[MOT[a.m].ls].n:TCF[MOT[a.m].tc].n)+") : un terrain commun existe, sur lequel ils peuvent s'appuyer. ";
+    if(a.car===b.car)t+="Même carrosserie ("+CAR[a.car].n+") : ils fonctionnent au même rythme. ";
+    else t+="Côté carrosserie : "+IXC[gk(a.car,b.car)].tempo+". ";
+    if(isMirror(a,b))t+="Ce sont des <b>profils miroirs</b> : le moteur de l'un est la carrosserie de l'autre. ";
+    t+="Sous stress, "+nm(a)+" peut basculer vers le "+MOT[a.st].cl+" et "+nm(b)+" vers le "+MOT[b.st].cl+".";
+    return t;
+  }
+  var dm=ORDER.slice().sort(function(x,y){return s.m[y]-s.m[x];})[0],dc=CAR_KEYS.slice().sort(function(x,y){return s.c[y]-s.c[x];})[0];
+  return"Cette équipe de "+s.n+" personnes est majoritairement mue par le moteur "+MOT[dm].cl+" ("+MOT[dm].n.toLowerCase()+" : "+MOT[dm].court+") et fonctionne surtout en mode "+CAR[dc].n+" (il ou elle "+CAR[dc].tend+"). "+
+    (s.sat>=0.6?"Elle prend volontiers de la hauteur (Satellite), au risque de négliger les détails concrets. ":s.sat<=0.4?"Elle est ancrée dans le concret (Loupe), au risque de manquer de recul et d'anticipation. ":"Elle équilibre vision et sens du concret. ")+
+    (s.tete>=0.6?"Ses décisions sont surtout logiques (Tête) : vigilance sur l'impact humain.":s.tete<=0.4?"Ses décisions sont surtout guidées par les valeurs et les personnes (Cœur) : vigilance sur les décisions difficiles.":"Elle équilibre logique et considération humaine.");
+}
+
+/* ═══ BINÔMES ═══ */
+function ring(v,c){var ci=2*Math.PI*30;return"<svg width='72' height='72' viewBox='0 0 72 72'><circle cx='36' cy='36' r='30' stroke='rgba(128,128,128,0.2)'/><circle cx='36' cy='36' r='30' stroke='"+c+"' stroke-linecap='round' stroke-dasharray='"+ci+"' stroke-dashoffset='"+ci*(1-v/100)+"'/></svg>";}
+function misund(a,b){
+  var q=[[a,QV[a.m][b.m]],[b,QV[b.m][a.m]]],ia=CAR[a.car].ie,ib=CAR[b.car].ie,ra=CAR[a.car].rc,rb=CAR[b.car].rc;
+  if(ia!==ib){q.push([a,QIE[ia]]);q.push([b,QIE[ib]]);}
+  if(ra!==rb){q.push([a,QRC[ra]]);q.push([b,QRC[rb]]);}
+  return q;
+}
+function strat(a,b,x){
+  var s=[x.m.cd,x.c.tip],ia=CAR[a.car].ie,ib=CAR[b.car].ie,ra=CAR[a.car].rc,rb=CAR[b.car].rc;
+  if(ia!==ib)s.push("Envoyer les sujets à l'avance (pour "+esc((ia==="In"?a:b).name)+"), prévoir un temps d'échange oral (pour "+esc((ia==="Ex"?a:b).name)+") et conclure par un écrit.");
+  else if(ia==="In")s.push("Planifier des points d'échange réguliers : entre deux profils internes, les désaccords peuvent rester silencieux.");
+  else s.push("Formaliser ce qui est décidé : entre deux profils externes, une idée lancée peut être prise pour une décision.");
+  if(ra!==rb)s.push("Définir ensemble un cadre minimal non négociable et une zone de liberté explicite.");
+  return s.concat(x.m.co.slice(0,2));
+}
+function pairsHTML(){
+  var h="<h2 class='sec-h'>🤝 Interactions par binôme</h2>";
+  pairs().forEach(function(x){
+    var a=x.a,b=x.b,sc=x.sc;
+    h+="<div class='pair'><div class='ph'>"+chip(a)+" ⟷ "+chip(b)+"</div><div class='sp'>";
+    [["Compatibilité",sc.compat],["Complémentarité",sc.compl],["Synergie",sc.syn]].forEach(function(k){var v=vdt(k[1]);h+="<div class='si'><div class='sl'>"+k[0]+"</div><div class='sr'>"+ring(k[1],v.c)+"<div class='sv' style='color:"+v.c+"'>"+k[1]+"%</div></div><div class='vd' style='color:"+v.c+"'>"+v.t+"</div></div>";});
+    h+="</div>";
+    if(isMirror(a,b))h+="<div class='box y'><p><b>🪞 Profils miroirs :</b> le moteur de "+nm(a)+" est la carrosserie de "+nm(b)+", et inversement. Ils se reconnaissent l'un dans l'autre, mais face à un dilemme "+esc(a.name)+" privilégiera "+MOT[a.m].prio+" et "+esc(b.name)+" "+MOT[b.m].prio+".</p></div>";
+    h+="<h3>Moteurs : "+x.m.l+"</h3><p>"+x.m.dyn+"</p><p class='ex'>📌 Exemple : "+x.m.ex+"</p>";
+    h+="<h3>Carrosseries : "+x.c.l+"</h3><p>"+cap1(x.c.tempo)+".</p><p class='ex'>📌 Exemple : "+x.c.ex+"</p>";
+    h+="<h3>Comment chacun perçoit l'autre</h3><ul>";
+    h+=li(nm(a)+" voit chez "+esc(b.name)+" quelqu'un de "+CAR[b.car].adj+" ; mais ce qui fait réellement avancer "+esc(b.name)+", c'est "+MOT[b.m].court+".");
+    h+=li(nm(b)+" voit chez "+esc(a.name)+" quelqu'un de "+CAR[a.car].adj+" ; mais ce qui fait réellement avancer "+esc(a.name)+", c'est "+MOT[a.m].court+".");
+    h+="</ul><h3>Dans les mêmes situations</h3>";
+    ["reunion","desaccord","urgence","changement"].forEach(function(k){var s=SIT.filter(function(z){return z.k===k;})[0];
+      h+="<div class='cmp'><b>"+s.ic+" "+s.n+"</b><div class='cgrid'>";
+      [a,b].forEach(function(p){h+="<div class='cside' style='border-left-color:"+MOT[p.m].c+"'><div class='clab' style='color:"+MOT[p.m].c+"'>"+esc(p.name)+"</div><p><i>On voit :</i> "+CSIT[p.car][k]+".</p><p><i>À l'intérieur :</i> "+MSIT[p.m][k]+".</p></div>";});
+      h+="</div></div>";});
+    h+="<div class='box y'><h4>💭 Malentendus typiques</h4><ul>"+misund(a,b).map(function(q){return li(nm(q[0])+" : <span class='q'>« "+q[1]+" »</span>");}).join("")+"</ul></div>";
+    h+="<h3>✅ Forces du binôme</h3><ul>"+x.m.f.map(li).join("")+"</ul><h3>⚠️ Risques de conflit</h3><ul>"+x.m.r.map(li).join("")+"</ul>";
+    h+="<div class='box g'><h4>Interaction positive au travail</h4><p>"+x.m.wp+"</p></div><div class='box r'><h4>Interaction négative au travail</h4><p>"+x.m.wn+"</p></div>";
+    var sx=IXM[gk(a.st,b.st)];
+    h+="<div class='box r'><h4>🔥 Sous stress ensemble</h4><p>En temps normal : "+MOT[a.m].cl+" ⟷ "+MOT[b.m].cl+". Sous pression : "+nm(a)+" bascule vers le <b>"+MOT[a.st].cl+"</b>"+(a.stAuto?" (attendu)":"")+", "+nm(b)+" vers le <b>"+MOT[b.st].cl+"</b>"+(b.stAuto?" (attendu)":"")+". Le binôme fonctionne alors comme un duo « "+sx.l+" » : "+sx.sd+"</p><p><b>Désamorcer :</b> avec "+nm(a)+" : "+REAC[a.st].aide+" Avec "+nm(b)+" : "+REAC[b.st].aide+"</p></div>";
+    h+="<div class='box b'><h4>💬 Stratégie de communication commune</h4><ul>"+strat(a,b,x).map(li).join("")+"</ul></div></div>";
+  });
+  return h;
+}
+
+/* ═══ EXPORT WORD ═══ */
+function doExport(){
+  try{
+    var now=new Date(),ds=now.toLocaleDateString("fr-FR",{day:"numeric",month:"long",year:"numeric"}),s=stats();
+    var css="@page{size:A4;margin:2cm 2.2cm;}body{font-family:Calibri,Arial,sans-serif;font-size:10.5pt;color:#1a1a1a;line-height:1.45;}h1{font-size:19pt;color:#2D7DD2;border-bottom:3px solid #2D7DD2;padding-bottom:5px;}h2{font-size:14pt;margin-top:18px;border-bottom:1px solid #ddd;padding-bottom:3px;}h3{font-size:11pt;margin:10px 0 3px;}h4{font-size:10.5pt;margin:0 0 2px;}table{border-collapse:collapse;width:100%;margin:6px 0;}td,th{border:1px solid #ccc;padding:5px 8px;vertical-align:top;}th{background:#f0f4f8;text-align:left;}ul{margin:3px 0 3px 18px;}.box{border:1px solid #ddd;padding:8px 10px;margin-top:6px;}.g{background:#f0fdf4;}.r{background:#fef2f2;}.b{background:#eff6ff;}.y{background:#fffbeb;}.ex{background:#f8fafc;padding:4px 8px;}.pb{font-weight:bold;}.pair{border:1px solid #ccc;padding:10px 12px;margin:10px 0;}.sp,.bar,.lbl,.axes,.sec-h{display:none;}.avg{text-align:center;font-size:13pt;font-weight:bold;}.small{font-size:9pt;color:#555;}.risk{margin:4px 0;}.lvl{color:#fff;font-weight:bold;padding:1px 6px;}";
+    var d="<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><style>"+css+"</style></head><body>";
+    d+="<h1>Rapport de dynamiques d'équipe</h1><p><b>Date :</b> "+ds+" &nbsp;|&nbsp; <b>Participants :</b> "+P.length+"</p>";
+    d+="<h2>1. Composition</h2><table><tr><th>Nom</th><th>Profil</th><th>Moteur</th><th>Carrosserie (ascendant)</th><th>Sous stress</th></tr>";
+    P.forEach(function(p){d+="<tr><td>"+esc(p.name)+"</td><td>"+NAMES[p.m][p.car]+"</td><td style='color:"+MOT[p.m].c+";font-weight:bold'>"+MOT[p.m].cl+" — "+MOT[p.m].n+"</td><td>"+CAR[p.car].n+" — "+MOT[CAR[p.car].col].cl+"</td><td>"+MOT[p.st].cl+(p.stAuto?" (attendu)":"")+"</td></tr>";});
+    d+="</table><h3>Risques collectifs</h3><table><tr><th>Risque</th><th>Niveau</th><th>Analyse et conseil</th></tr>";
+    risks(s).forEach(function(r){d+="<tr><td>"+r.k+"</td><td style='color:"+r.col+";font-weight:bold'>"+r.lvl+"</td><td>"+(r.lvl==="Faible"?r.lo:r.hi+" <i>Conseil : "+r.con+"</i>")+"</td></tr>";});
+    d+="</table><h2>2. Synthèse d'expert</h2>"+synHTML().replace(/^<div class='card'><h2>[^<]*<\/h2>/,"").replace(/<\/div>$/,"");
+    d+="<h2>3. Fiches individuelles</h2>"+profHTML().replace(/^<div class='card'><h2>[^<]*<\/h2>/,"");
+    d+="<h2>4. Interactions par binôme</h2>"+pairsHTML();
+    d+="<h2>5. Méthodologie, sources et limites</h2><p class='small'>Moteur = Loupe/Satellite × Tête/Cœur (fonctions de Jung : Raisonnement = Satellite + Tête, Idéal = Satellite + Cœur, Harmonie = Loupe + Cœur, Pragmatisme = Loupe + Tête). Carrosserie (ascendant) = Interne/Externe × Rond/Carré ; couleur associée selon les styles observables du DISC (Pilotage = Rouge, Aventure = Jaune, Adaptabilité = Vert, Prudence = Bleu). Compatibilité et complémentarité : 60 % moteurs + 40 % carrosseries, bonus lorsque la carrosserie de l'un a la couleur du moteur de l'autre. Synergie = 45 % compatibilité + 55 % complémentarité. Le fonctionnement sous stress est traité à part (couleur opposée par défaut : Rouge ↔ Vert, Jaune ↔ Bleu). Indicateurs pédagogiques, non psychométriques.</p>";
+    d+="<p class='small'><b>Sources :</b> Jung C. G. (1921) Types psychologiques ; Myers I. B. &amp; McCaulley M. H. (1985) MBTI Manual ; Insights Discovery (A. et A. Lothian) ; Marston W. M. (1928) Emotions of Normal People ; Geier J. G. (1979) Personal Profile System. Carrosseries, Interne/Externe et Rond/Carré : modèle de formation non validé psychométriquement.</p>";
+    d+="<p class='small'><b>Limites :</b> outil de réflexion sur les interactions professionnelles. Ne constitue ni un diagnostic psychologique ou médical, ni une évaluation des personnes, et ne doit pas servir au recrutement ni à une décision d'aptitude.</p></body></html>";
+    var fn="Dynamiques_equipe_"+now.getFullYear()+"-"+(now.getMonth()+1)+"-"+now.getDate()+".docx";
+    DOCX.download(d,fn,"Dynamiques d'équipe");
+    $("eSt").textContent="Rapport téléchargé !";
+  }catch(err){$("eSt").textContent="Erreur d'export : "+err.message;}
+}
+(function(){try{var m=location.search.match(/[?&]code=([^&]+)/);if(m){var x=parseCode(decodeURIComponent(m[1]));if(x){P.push(x);$("impMsg").textContent=x.name+" ajouté(e) depuis le test. Ajoute au moins une autre personne.";refresh();}}}catch(e){}})();
+
+</script>
+</body>
+</html>
